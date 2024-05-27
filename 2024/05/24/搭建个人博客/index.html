@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-    <meta name="description" content="参考使用Hexo从0到1搭建个人博客详细教程（超详细，超简单） 从零开始搭建个人博客（超详细） 部署到Github 购买域名：阿里云  安装node.js  配置npm安装的默认目录，并安装webpack    安装博客网站的框架Hexo  在Github新建一个仓库  本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo   初始化博客    静态部署    启">
+    <meta name="description" content="参考使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）从零开始搭建个人博客（超详细）可能是最全面的github pages搭建个人博客教程 部署到Github 购买域名：阿里云 安装node.js 配置npm安装的默认目录，并安装webpack  安装博客网站的框架Hexo 在Github新建一个仓库 本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo">
 <meta property="og:type" content="article">
-<meta property="og:title" content="搭建个人博客">
+<meta property="og:title" content="搭建个人博客(Hexo + Github)">
 <meta property="og:url" content="http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/index.html">
 <meta property="og:site_name" content="hourhl&#39;s blog">
-<meta property="og:description" content="参考使用Hexo从0到1搭建个人博客详细教程（超详细，超简单） 从零开始搭建个人博客（超详细） 部署到Github 购买域名：阿里云  安装node.js  配置npm安装的默认目录，并安装webpack    安装博客网站的框架Hexo  在Github新建一个仓库  本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo   初始化博客    静态部署    启">
+<meta property="og:description" content="参考使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）从零开始搭建个人博客（超详细）可能是最全面的github pages搭建个人博客教程 部署到Github 购买域名：阿里云 安装node.js 配置npm安装的默认目录，并安装webpack  安装博客网站的框架Hexo 在Github新建一个仓库 本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png">
 <meta property="og:image" content="http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png">
@@ -35,10 +35,10 @@
 <meta property="og:image" content="http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png">
 <meta property="og:image" content="http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png">
 <meta property="article:published_time" content="2024-05-24T08:32:07.000Z">
-<meta property="article:modified_time" content="2024-05-24T12:08:15.838Z">
+<meta property="article:modified_time" content="2024-05-27T12:20:46.273Z">
 <meta property="article:author" content="lhl">
-<meta property="article:tag" content="blog">
 <meta property="article:tag" content="experience">
+<meta property="article:tag" content="blog">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png">
     
@@ -60,7 +60,7 @@
       
     
     <!-- title -->
-    <title>搭建个人博客</title>
+    <title>搭建个人博客(Hexo + Github)</title>
     <!-- async scripts -->
     <!-- Google Analytics -->
 
@@ -120,16 +120,16 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&text=搭建个人博客"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&is_video=false&description=搭建个人博客"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=搭建个人博客&body=Check out this article: http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&name=搭建个人博客&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&t=搭建个人博客"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&text=搭建个人博客(Hexo + Github)"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&is_video=false&description=搭建个人博客(Hexo + Github)"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=搭建个人博客(Hexo + Github)&body=Check out this article: http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&name=搭建个人博客(Hexo + Github)&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&t=搭建个人博客(Hexo + Github)"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -149,7 +149,7 @@
   <header>
     
     <h1 class="posttitle p-name" itemprop="name headline">
-        搭建个人博客
+        搭建个人博客(Hexo + Github)
     </h1>
 
 
@@ -181,128 +181,72 @@
   
 
   <div class="content e-content" itemprop="articleBody">
-    <p>参考<br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a></p>
+    <p>参考<br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a target="_blank" rel="noopener" href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
 <h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
-<li><p>购买域名：阿里云</p>
-</li>
-<li><p>安装node.js</p>
-</li>
-<li><p>配置npm安装的默认目录，并安装webpack</p>
-<!-- ![](/_posts/搭建个人博客/image1.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1">
-</li>
-<li><p>安装博客网站的框架Hexo</p>
-<ul>
-<li><p>在Github新建一个仓库</p>
-</li>
-<li><p>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo</p>
-<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
+<li>购买域名：阿里云</li>
+<li>安装node.js</li>
+<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>安装博客网站的框架Hexo<ul>
+<li>在Github新建一个仓库</li>
+<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
 <img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
-<li><p>初始化博客</p>
-<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3">
-</li>
-<li><p>静态部署</p>
-<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4">
-</li>
-<li><p>启动服务器</p>
-<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5">
-</li>
-<li><p>浏览器访问</p>
-</li>
-</ul>
-<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
+<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
+<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
+<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
 <img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
-
-<p>  本地部署完成</p>
-</li>
-<li><p>将Hexo部署到Github</p>
-<ul>
-<li><p>在Blog文件下找到_config.yml并打开，在文件末尾追加</p>
-<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7">
-</li>
-<li><p>还是在Blog文件夹下打开Git Bash，安装git部署插件</p>
-<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8">
-</li>
-<li><p>清理缓存并重新部署</p>
-<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9">
-</li>
-<li><p>浏览器访问</p>
-<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
-
-<p>部署成功</p>
-</li>
+本地部署完成</li>
 </ul>
 </li>
-<li><p>绑定域名</p>
-<ul>
-<li><p>在阿里云域名控制台点击“解析”</p>
-<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12">
+<li>将Hexo部署到Github<ul>
+<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
+<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
+<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
+部署成功</li>
+</ul>
 </li>
-<li><p>添加两条记录，其中第一条记录值可以ping 仓库名得到</p>
-<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
+<li>绑定域名<ul>
+<li>在阿里云域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
+<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
 <img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
-
 <!-- ![](/source/_posts/搭建个人博客/image19.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19">
-</li>
-<li><p>在Blog\source下新建一个CNAME文件，写入购买的域名</p>
-<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14">
-</li>
-<li><p>还是在Blog文件夹下，打开Git Bash，依次执行以下代码</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>查看repo的setting-&gt;Pages,Custom domain已经配置好了</p>
-<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
+<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
+<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
 <img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
-
 <!-- ![](/source/_posts/搭建个人博客/image16.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16">
-</li>
-<li><p>直接访问该域名</p>
-<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
+<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
 <img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
 </ul>
 </li>
 </ul>
 <h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
 <h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
-<li><p>本人喜欢简约的，选择了Cactus主题</p>
-<ul>
-<li><p><a target="_blank" rel="noopener" href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></p>
-</li>
-<li><p>在Blog目录下打开Git Bash，执行git clone</p>
-<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22">
-</li>
-<li><p>修改_config.yml</p>
-<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23">
-</li>
-<li><p>进入&#x2F;theme&#x2F;cactus文件夹下，将_config.yml改名_config.cactus.yml并复制到Blog目录下</p>
-</li>
-<li><p>进入_config.cactus.yml，选择自己喜欢的scheme</p>
-<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25">
-</li>
-<li><p>重新启动hexo</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>博客页面的主题已经被成功切换</p>
-<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26">
-</li>
-<li><p>优化主题可参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></p>
-</li>
+<li>本人喜欢简约的，选择了Cactus主题<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
+<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
+<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
+<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
+<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
+<li>优化主题可参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
 </ul>
 </li>
 </ul>
@@ -340,16 +284,16 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&text=搭建个人博客"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&is_video=false&description=搭建个人博客"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=搭建个人博客&body=Check out this article: http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&name=搭建个人博客&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&t=搭建个人博客"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&text=搭建个人博客(Hexo + Github)"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&is_video=false&description=搭建个人博客(Hexo + Github)"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=搭建个人博客(Hexo + Github)&body=Check out this article: http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&title=搭建个人博客(Hexo + Github)"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&name=搭建个人博客(Hexo + Github)&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/&t=搭建个人博客(Hexo + Github)"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
