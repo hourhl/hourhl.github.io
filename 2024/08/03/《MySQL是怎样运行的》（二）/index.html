@@ -14,7 +14,7 @@
 <meta property="og:description" content="二、索引存储结构MySQL中有不同的存储引擎，其存储方式均有所不同，一下仅以InnoDB引擎为例  读取方式：页 InnoDB将数据库中的数据划分为若干页，每次进行数据存取是都以页为单位，页的大小是16KB.每一个页面上以记录的形式存放着相关数据，每条记录又可分为真实数据、额外数据和隐藏列（以COMPACT行格式为例），额外数据是用来辅助存储和读取信息的，包括变长字段长度列表、NULL值列表和记录">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-08-03T11:04:07.000Z">
-<meta property="article:modified_time" content="2024-08-04T03:23:37.045Z">
+<meta property="article:modified_time" content="2024-08-04T03:34:05.577Z">
 <meta property="article:author" content="lhl">
 <meta property="article:tag" content="reading">
 <meta property="article:tag" content="MySQL">
@@ -202,6 +202,11 @@
 <td align="center">16</td>
 <td align="center">下一条记录的位置</td>
 </tr>
+<tr>
+<td align="center">:—:</td>
+<td align="center">:—:</td>
+<td align="center">:—:</td>
+</tr>
 </tbody></table>
 </li>
 <li><strong>隐藏列</strong> 包括row_id、trx_id和roll_pointer。row_id非必须，只有表中没有定义主键，也没有不允许存储NULL值的UNIQUE键时，才会添加该字段,占用6字节。trx_id时必须的，占用6字节，属于事务id。roll_pointer也是必须的，占用7字节，用于进行事务回滚。</li>
@@ -252,6 +257,11 @@
 <td align="center">文件尾</td>
 <td align="center">8</td>
 <td align="center">校验页的完整性</td>
+</tr>
+<tr>
+<td align="center">:—:</td>
+<td align="center">:—:</td>
+<td align="center">:—:</td>
 </tr>
 </tbody></table>
 </li>
