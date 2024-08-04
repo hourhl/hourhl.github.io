@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-    <meta name="description" content="二、索引存储结构MySQL中有不同的存储引擎，其存储方式均有所不同，一下仅以InnoDB引擎为例  读取方式：页 InnoDB将数据库中的数据划分为若干页，每次进行数据存取是都以页为单位，页的大小是16KB.每一个页面上以记录的形式存放着相关数据，每条记录又可分为真实数据、额外数据和隐藏列（以COMPACT行格式为例），额外数据是用来辅助存储和读取信息的，包括变长字段长度列表、NULL值列表和记录">
+    <meta name="description" content="二、索引存储结构MySQL中有不同的存储引擎，其存储方式均有所不同，以下仅以InnoDB引擎为例  读取方式：页 InnoDB将数据库中的数据划分为若干页，每次进行数据存取是都以页为单位，页的大小是16KB.每一个页面上以记录的形式存放着相关数据，每条记录又可分为真实数据、额外数据和隐藏列（以COMPACT行格式为例），额外数据是用来辅助存储和读取信息的，包括变长字段长度列表、NULL值列表和记录">
 <meta property="og:type" content="article">
 <meta property="og:title" content="《MySQL是怎样运行的》（二）">
 <meta property="og:url" content="http://example.com/2024/08/03/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%8C%EF%BC%89/index.html">
 <meta property="og:site_name" content="hourhl&#39;s blog">
-<meta property="og:description" content="二、索引存储结构MySQL中有不同的存储引擎，其存储方式均有所不同，一下仅以InnoDB引擎为例  读取方式：页 InnoDB将数据库中的数据划分为若干页，每次进行数据存取是都以页为单位，页的大小是16KB.每一个页面上以记录的形式存放着相关数据，每条记录又可分为真实数据、额外数据和隐藏列（以COMPACT行格式为例），额外数据是用来辅助存储和读取信息的，包括变长字段长度列表、NULL值列表和记录">
+<meta property="og:description" content="二、索引存储结构MySQL中有不同的存储引擎，其存储方式均有所不同，以下仅以InnoDB引擎为例  读取方式：页 InnoDB将数据库中的数据划分为若干页，每次进行数据存取是都以页为单位，页的大小是16KB.每一个页面上以记录的形式存放着相关数据，每条记录又可分为真实数据、额外数据和隐藏列（以COMPACT行格式为例），额外数据是用来辅助存储和读取信息的，包括变长字段长度列表、NULL值列表和记录">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-08-03T11:04:07.000Z">
-<meta property="article:modified_time" content="2024-08-04T03:35:04.260Z">
+<meta property="article:modified_time" content="2024-08-04T04:07:13.245Z">
 <meta property="article:author" content="lhl">
 <meta property="article:tag" content="reading">
 <meta property="article:tag" content="MySQL">
@@ -159,7 +159,7 @@
   
 
   <div class="content e-content" itemprop="articleBody">
-    <h1 id="二、索引"><a href="#二、索引" class="headerlink" title="二、索引"></a>二、索引</h1><h2 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h2><p><code>MySQL中有不同的存储引擎，其存储方式均有所不同，一下仅以InnoDB引擎为例</code></p>
+    <h1 id="二、索引"><a href="#二、索引" class="headerlink" title="二、索引"></a>二、索引</h1><h2 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h2><p><code>MySQL中有不同的存储引擎，其存储方式均有所不同，以下仅以InnoDB引擎为例</code></p>
 <ul>
 <li><strong>读取方式：页</strong> InnoDB将数据库中的数据划分为若干页，每次进行数据存取是都以页为单位，页的大小是16KB.每一个页面上以记录的形式存放着相关数据，每条记录又可分为真实数据、额外数据和隐藏列（以COMPACT行格式为例），额外数据是用来辅助存储和读取信息的，包括变长字段长度列表、NULL值列表和记录头信息。<ol>
 <li><p><strong>变长字段长度列表</strong> 常见的变长字段类型包括VARCHAR、TEXT类型等，这些数据类型的长度是不固定的，为了从记录中准确读取它的内容，就需要记录它所占据的字节数。</p>
@@ -198,7 +198,7 @@
 <tr>
 <td align="center">record_type</td>
 <td align="center">3</td>
-<td align="center">当前记录的类型，0 - 普通记录，1 - B+树非叶子节点，2 - Infimum记录，3 - Supremum记录</td>
+<td align="center">当前记录的类型</td>
 </tr>
 <tr>
 <td align="center">next_record</td>
@@ -214,7 +214,8 @@
 <li><strong>溢出列</strong> 当某条记录所占空间过大时，在记录的真实数据处只会存放该字段的部分数据，然后用20字节指向剩余数据存放页的位置。</li>
 </ul>
 <h2 id="数据页结构"><a href="#数据页结构" class="headerlink" title="数据页结构"></a>数据页结构</h2><ul>
-<li>数据页大小为16KB，主要可以分为七大部分，分别是<code>File Header</code> \ <code>Page Header</code> \ <code>Infimum + Supremum</code> \ <code>User Records</code> \ <code>Fres Space</code> \ <code>Page Directory</code> \ <code>File Trailer</code>.<table>
+<li><p>数据页大小为16KB，主要可以分为七大部分，分别是<code>File Header</code> \ <code>Page Header</code> \ <code>Infimum + Supremum</code> \ <code>User Records</code> \ <code>Fres Space</code> \ <code>Page Directory</code> \ <code>File Trailer</code>.</p>
+<table>
 <thead>
 <tr>
 <th align="center">模块</th>
@@ -258,6 +259,27 @@
 <td align="center">校验页的完整性</td>
 </tr>
 </tbody></table>
+</li>
+<li><p>数据相关操作</p>
+<ul>
+<li><strong>增</strong> - 往用户记录空间插入一条记录<ol>
+<li>每个页中都有两条默认插入的记录，分别是最小记录Infimum和最大记录Supremum，记录的大小通过主键的大小来确定，但是这两条是默认最大和最小的，但这两条记录存放在用户记录区域的靠前部分。</li>
+<li>页面中所有记录都会分组，Infimum所在的组只能有1条记录，即它自己，Supremum所在的记录数量限制在1-8条，其余组的记录数量限制在4-8条。新增的记录从最近的比它大的记录所在的组开始插入。当组中记录的数量达到9条，从中间划分，生成一个新的组，前一个组的大小为4，后一个组的大小为5。</li>
+</ol>
+</li>
+<li><strong>删</strong> - 从用户记录空间删除一条记录<ol>
+<li>被删除的记录并不会直接从磁盘中删除，而是修改deleted_flag，其值为1时表示被删除，同时修改其next_record值为1，表示没有下一条记录。</li>
+<li>所有被删除的记录会组成一个垃圾链表，按照主键由小到大的顺序链接，这些链表占用的空间被称为可重用空间。</li>
+</ol>
+</li>
+<li><strong>查</strong> - 从用户记录空间查询一条记录</li>
+<li><strong>记录头信息</strong><ol>
+<li>heap_no : 存放在页面前面的记录heap_no值偏小，每新生成一条记录的存储空间，其值都比物理位置在它前面的那条记录的heap_no值大1。</li>
+<li>record_type : 0表示普通记录，1表示B+树非叶子节点的目录项记录，2表示Infimum，3表示Supremum。</li>
+<li>next_record ： 当前记录的数据部分到下一条记录的数据部分。注意每条记录由记录头部分和数据部分组成，这个指向的是数据部分的开头，这样的好处是向后可以遍历数据，向前可以遍历该记录的记录头。当这个值为正数，说明下一条记录（指按主键排列的下一条记录，不是插入顺序的下一条记录）在当前记录的后面，反之在前面。规定Infimum记录的下一条记录就是当前页面主键值最小的记录，Supremum记录的next_record值为0，表示没有下一条记录。</li>
+</ol>
+</li>
+</ul>
 </li>
 </ul>
 
