@@ -341,7 +341,7 @@
 </ul>
 <h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
 <h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
-<li>本人喜欢简约风格，选择了Cactus主题<ul>
+<li>以Cactus主题为例<ul>
 <li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
 <li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
 <img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
