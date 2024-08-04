@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Welcome</title>
+    <url>/2024/05/23/Welcome/</url>
+    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
+]]></content>
+  </entry>
+  <entry>
+    <title>《MySQL是怎样运行的》(一)</title>
+    <url>/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/</url>
+    <content><![CDATA[<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="客户端-服务器架构"><a href="#客户端-服务器架构" class="headerlink" title="客户端&#x2F;服务器架构"></a>客户端&#x2F;服务器架构</h2><ul>
+<li>mysqld：MySQL服务器程序，运行该程序可以启动一个服务器进程</li>
+<li>mysql：MySQL客户端程序，运行该程序可以发送请求并接收服务器的处理结果 </li>
+<li>客户端与服务器的连接<span id="more"></span>
+<ul>
+<li>本质：进程间通信</li>
+<li>网络通信协议：TCP&#x2F;IP</li>
+<li>服务器默认端口：3306</li>
+<li>服务器处理的流程：连接管理 -&gt; 解析与优化 -&gt; 存储引擎<ul>
+<li><strong>连接管理</strong>：客户端可以携带主机信息、用户名与密码等信息，采用TCP&#x2F;TP、命名管道或者共享内存、UNIX套接字等方式连接服务端。每当有客户端信息验证通过，连接到服务器端进程时，服务器端就会创建一个线程进行交互；当通信结束后，并不会立即销毁该线程，而是缓存起来，当有新的客户端连接时，将这个线程分配给新的客户端</li>
+<li><strong>解析与优化</strong>：查询缓存 -&gt; 语法解析 -&gt; 查询优化<ol>
+<li>查询缓存 – 同样的请求会从缓存中查找结果，但是如果两个请求有任何字符上的不同，都会重新计算</li>
+<li>查询优化 – 优化的结果是生成一个执行计划，可以通过<code>explain</code>来查看</li>
+</ol>
+</li>
+<li><strong>存储引擎</strong>：默认引擎是InnoDB</li>
+</ul>
+</li>
+<li>实现效果：客户端向服务器发送一段文本（SQL语句），服务器进程处理后再向客户端返回一段文本</li>
+</ul>
+</li>
+</ul>
+<h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><ul>
+<li>启动选项<ul>
+<li>命令行修改<br><code>仅对当次启动生效</code> </li>
+<li>配置文件修改<br><code>无论是Linux系统还是Windows系统，都有多个对应的配置文件查找路径，且路径之间有优先级</code></li>
+</ul>
+</li>
+<li>系统变量<ul>
+<li>系统变量有不同的作用范围，包括GLOBAL和SESSION</li>
+<li>大部分的系统变量可以当作启动项来设置，但是有些系统变量是程序运行过程中自动生成，无法修改</li>
+</ul>
+</li>
+</ul>
+<h2 id="字符集和比较规则"><a href="#字符集和比较规则" class="headerlink" title="字符集和比较规则"></a>字符集和比较规则</h2><ul>
+<li>将字符映射成二进制称为编码，反之为解码。人们抽象出一个字符集的概念来描述某个字符范围的编码规则<br><code>常见字符集：ASCII、ISO8859-1、GB2312等</code></li>
+<li>每个字符集有多个比较规则，比如是否区分重音、是否区分大小写等</li>
+</ul>
+]]></content>
+      <categories>
+        <category>阅读</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《MySQL是怎样运行的》（二）</title>
+    <url>/2024/08/03/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%8C%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="数据页"><a href="#数据页" class="headerlink" title="数据页"></a>数据页</h1><h2 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h2><p><code>MySQL中有不同的存储引擎，其存储方式均有所不同，以下仅以InnoDB引擎为例</code></p>
+<ul>
+<li><strong>读取方式：页</strong> InnoDB将数据库中的数据划分为若干页，每次进行数据存取是都以页为单位，页的大小是16KB.每一个页面上以记录的形式存放着相关数据，每条记录又可分为真实数据、额外数据和隐藏列（以COMPACT行格式为例），额外数据是用来辅助存储和读取信息的，包括变长字段长度列表、NULL值列表和记录头信息。<span id="more"></span>
+<ol>
+<li><p><strong>变长字段长度列表</strong> 常见的变长字段类型包括VARCHAR、TEXT类型等，这些数据类型的长度是不固定的，为了从记录中准确读取它的内容，就需要记录它所占据的字节数。</p>
+<ul>
+<li>变长字段的长度是按逆序存放的。例如变长字段1占据3字节，字段2占据8字节，则变长字段长度列表的存放就是0x080x03。</li>
+<li>假设某个字段L是VARCHAR(m)类型，采用的字符集最多需要使用w字节来表示一个字符，且其真实占用的字节数是L。当m×w的乘积结果小于等于255，则其只需要用1个字节来存放它的长度；当乘积结果大于255且L也大于127，则需要用2两个字节来存放它的长度，否则用1个字节即可。</li>
+<li>变长字段长度列表只存储值为非NULL的变长字段列。</li>
+</ul>
+</li>
+<li><p><strong>NULL值列表</strong> 该列表仅在表中允许存储NULL值的列存在的时候存在。其值等同于对应列按整数个字节逆序存放，并且用二进制表示。例如有三个列允许NULL值存在，且仅有第二和第三列为NULL，则其对应的NULL值列表的二进制表示为00000110。由于仅有三个列，需要1个字节来存放即可，高位用0补全，同时考虑到第二和第三列为NULL，正常情况为<code>0</code> <code>1</code> <code>1</code>，根据COMPACT行格式的存放规则，需要逆序存放，故得到的结果为00000110，即0x06。</p>
+</li>
+<li><p><strong>记录头信息</strong> 该部分固定由5字节组成，用于描述记录的一些属性。此处仅列出比较重要的字段，不再多做赘述，可以查找资料了解即可。</p>
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">大小（bit）</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">n_owned</td>
+<td align="center">4</td>
+<td align="center">组中的领头节点记录该组中的记录条数</td>
+</tr>
+<tr>
+<td align="center">deleted_flag</td>
+<td align="center">1</td>
+<td align="center">标记该记录是否被删除</td>
+</tr>
+<tr>
+<td align="center">min_rec_flag</td>
+<td align="center">1</td>
+<td align="center">B+树中每层非叶子节点的最小的目录项</td>
+</tr>
+<tr>
+<td align="center">heap_no</td>
+<td align="center">13</td>
+<td align="center">当前记录在堆中的相对位置</td>
+</tr>
+<tr>
+<td align="center">record_type</td>
+<td align="center">3</td>
+<td align="center">当前记录的类型</td>
+</tr>
+<tr>
+<td align="center">next_record</td>
+<td align="center">16</td>
+<td align="center">下一条记录的位置</td>
+</tr>
+</tbody></table>
+</li>
+<li><p><strong>隐藏列</strong> 包括row_id、trx_id和roll_pointer。row_id非必须，只有表中没有定义主键，也没有不允许存储NULL值的UNIQUE键时，才会添加该字段,占用6字节。trx_id时必须的，占用6字节，属于事务id。roll_pointer也是必须的，占用7字节，用于进行事务回滚。</p>
+</li>
+</ol>
+</li>
+<li><strong>溢出列</strong> 当某条记录所占空间过大时，在记录的真实数据处只会存放该字段的部分数据，然后用20字节指向剩余数据存放页的位置。</li>
+</ul>
+<h2 id="数据页结构"><a href="#数据页结构" class="headerlink" title="数据页结构"></a>数据页结构</h2><ul>
+<li><p>数据页大小为16KB，主要可以分为七大部分，分别是<code>File Header</code> \ <code>Page Header</code> \ <code>Infimum + Supremum</code> \ <code>User Records</code> \ <code>Fres Space</code> \ <code>Page Directory</code> \ <code>File Trailer</code>.</p>
+<table>
+<thead>
+<tr>
+<th align="center">模块</th>
+<th align="center">占用空间（字节）</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">文件头</td>
+<td align="center">38</td>
+<td align="center">页的通用信息</td>
+</tr>
+<tr>
+<td align="center">页面头</td>
+<td align="center">56</td>
+<td align="center">数据页的专有信息</td>
+</tr>
+<tr>
+<td align="center">页面的最大记录和最小记录</td>
+<td align="center">26</td>
+<td align="center">两个虚拟记录</td>
+</tr>
+<tr>
+<td align="center">数据（用户记录）</td>
+<td align="center">不定</td>
+<td align="center">用户存储的数据</td>
+</tr>
+<tr>
+<td align="center">空白区域</td>
+<td align="center">不确定</td>
+<td align="center">页面中尚未使用的空间</td>
+</tr>
+<tr>
+<td align="center">页目录</td>
+<td align="center">不确定</td>
+<td align="center">页面中某些记录的相对位置</td>
+</tr>
+<tr>
+<td align="center">文件尾</td>
+<td align="center">8</td>
+<td align="center">校验页的完整性</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>数据相关操作</p>
+<ul>
+<li><strong>增</strong> - 往用户记录空间插入一条记录<ol>
+<li>每个页中都有两条默认插入的记录，分别是最小记录Infimum和最大记录Supremum，记录的大小通过主键的大小来确定，这两条是默认最大和最小的，但这两条记录存放在用户记录区域的靠前部分。</li>
+<li>页面中所有记录都会分组，Infimum所在的组只能有1条记录，即它自己，Supremum所在的记录数量限制在1-8条，其余组的记录数量限制在4-8条。新增的记录从最近的比它大的记录所在的组开始插入。当组中记录的数量达到9条，从中间划分，生成一个新的组，前一个组的大小为4，后一个组的大小为5。</li>
+</ol>
+</li>
+<li><strong>删</strong> - 从用户记录空间删除一条记录<ol>
+<li>被删除的记录并不会直接从磁盘中删除，而是修改deleted_flag，其值为1时表示被删除，同时修改其next_record值为1，表示没有下一条记录。</li>
+<li>所有被删除的记录会组成一个垃圾链表，按照主键由小到大的顺序链接，这些链表占用的空间被称为可重用空间。</li>
+</ol>
+</li>
+<li><strong>查</strong> - 从用户记录空间查询一条记录<ol>
+<li>每一组中最后一条记录的真实数据与该页开头的偏移量称为槽，按照组的逆序排列在页目录中，且从靠近文件尾的部分开始存储，每个槽占用2个字节。<img src="/2024/08/03/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%8C%EF%BC%89/datatype-structure.png" class="" width="200" title="datatype-structure"></li>
+<li>按照二分法，low &#x3D; 槽0， high &#x3D; 槽n,先计算中间的槽的主键值（对应该组中最大的记录的主键值），然后修改low或者high。直到确认目标主键在哪一组中，遍历该组即可。（每一组最多只有8条记录，遍历速度很快）</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p>记录头信息</p>
+<ol>
+<li>n_owned : 每个页面中的记录会分为若干个组，组内最大的记录会记录该组内有多少条记录</li>
+<li>heap_no : 存放在页面前面的记录heap_no值偏小，每新生成一条记录的存储空间，其值都比物理位置在它前面的那条记录的heap_no值大1。heap_no从2开始，因为0和1分别指代了Infimum和Supremum。</li>
+<li>record_type : 0表示普通记录，1表示B+树非叶子节点的目录项记录，2表示Infimum，3表示Supremum。</li>
+<li>next_record ： 当前记录的数据部分到下一条记录的数据部分。注意每条记录由记录头部分和数据部分组成，这个指向的是数据部分的开头，这样的好处是向后可以遍历数据，向前可以遍历该记录的记录头。当这个值为正数，说明下一条记录（指按主键排列的下一条记录，不是插入顺序的下一条记录）在当前记录的后面，反之在前面。规定Infimum记录的下一条记录就是当前页面主键值最小的记录，Supremum记录的next_record值为0，表示没有下一条记录。</li>
+</ol>
+</li>
+<li><p>页面头<br>页面头是页结构的第二部分，占用56字节，其各个部分的作用如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">占用空间（字节）</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">PAGE_N_DIR_SLOTS</td>
+<td align="center">2</td>
+<td align="center">页目录中的槽数量</td>
+</tr>
+<tr>
+<td align="center">PAGE_HEAP_TOP</td>
+<td align="center">2</td>
+<td align="center">空闲空间起始地址</td>
+</tr>
+<tr>
+<td align="center">PAGE_N_HEAP</td>
+<td align="center">2</td>
+<td align="center">前1比特表示本记录是否为紧凑型的记录，后15bit表示本页中记录的数量，包括Infimum和Supremum，以及删除的记录）</td>
+</tr>
+<tr>
+<td align="center">PAGE_FREE</td>
+<td align="center">2</td>
+<td align="center">已删除的记录链表中起始记录所在的偏移地址</td>
+</tr>
+<tr>
+<td align="center">PAGE_GARBAGE</td>
+<td align="center">2</td>
+<td align="center">已删除的记录占用的字节数</td>
+</tr>
+<tr>
+<td align="center">PAGE_LAST_INSERT</td>
+<td align="center">2</td>
+<td align="center">最后插入的记录的位置</td>
+</tr>
+<tr>
+<td align="center">PAGE_DIRECTION</td>
+<td align="center">2</td>
+<td align="center">记录插入的方向（新插入的记录的主键比上一条大或者小，前者认为是向右，否则向左）</td>
+</tr>
+<tr>
+<td align="center">PAGE_N_DIRECTION</td>
+<td align="center">2</td>
+<td align="center">一个方向连续插入的记录数量（仅记录最新值）</td>
+</tr>
+<tr>
+<td align="center">PAGE_MAX_TRX_ID</td>
+<td align="center">8</td>
+<td align="center">修改当前页的最大事务id，该值仅在二级索引页面中定义</td>
+</tr>
+<tr>
+<td align="center">PAGE_LEVEL</td>
+<td align="center">2</td>
+<td align="center">当前页在B+树中所处的层级</td>
+</tr>
+<tr>
+<td align="center">PAGE_INDEX_ID</td>
+<td align="center">8</td>
+<td align="center">当前页属于的索引id</td>
+</tr>
+<tr>
+<td align="center">PAGE_BTR_SEG_LEAF</td>
+<td align="center">10</td>
+<td align="center">B+树叶子节点段的头部信息，仅在B+树的根页面中定义</td>
+</tr>
+<tr>
+<td align="center">PAGE_BTR_SEG_TOP</td>
+<td align="center">10</td>
+<td align="center">B+树非叶子节点段的头部信息，仅在B+树的根页面中定义</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>文件头</p>
+</li>
+<li><p>文件尾</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>阅读</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>搭建个人博客(Hexo + Github)</title>
+    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
+<span id="more"></span>
+
+<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
+<li>安装node.js</li>
+<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>安装博客网站的框架Hexo<ul>
+<li>在Github新建一个仓库</li>
+<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
+<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
+<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
+<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
+本地部署完成</li>
+</ul>
+</li>
+<li>将Hexo部署到Github<ul>
+<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
+<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
+<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
+部署成功</li>
+</ul>
+</li>
+<li>绑定域名<ul>
+<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
+<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
+<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
+<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
+<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
+<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
+<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
+</ul>
+</li>
+</ul>
+<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
+<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
+<li>本人喜欢简约风格，选择了Cactus主题<ul>
+<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
+<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
+<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
+<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
+<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
+<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>experience</category>
+      </categories>
+      <tags>
+        <tag>blog</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>撰写博客(Hexo + Github)</title>
+    <url>/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="新建md文件"><a href="#新建md文件" class="headerlink" title="新建md文件"></a>新建md文件</h1><ul>
+<li><code>hexo n filename</code> – 在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>参照<a href="https://markdown.com.cn/basic-syntax/">Markdown 官方教程</a>编写文章内容<span id="more"></span></li>
+</ul>
+<h1 id="新建草稿"><a href="#新建草稿" class="headerlink" title="新建草稿"></a>新建草稿</h1><ul>
+<li><code>hexo n draft filename</code> – 在&#x2F;source&#x2F;_drafts文件夹下生成一个filename.md</li>
+<li><code>hexo publish filename</code> – 发布文章，将md文件移动到&#x2F;source&#x2F;_posts下</li>
+</ul>
+<h1 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h1><ul>
+<li>为了实现结构化管理每篇博客的图像，将_config.yml中的post_asset_folder设置为true，并加入以下内容<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
+<li>配置文件修改完成后，每次运行<code>hexo n filename</code>都会在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md和一个&#x2F;filename文件夹</li>
+<li>插入图片<ul>
+<li>将需要加载的图片放入到与当前博客同名的文件夹下</li>
+<li>在需要插入图片的位置插入以下代码 <code>&#123;% asset_img 随便什么名.png 想要插入的图片名 %&#125;</code>，即可在网页上加载出来</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>experience</category>
+      </categories>
+      <tags>
+        <tag>blog</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+</search>
