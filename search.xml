@@ -276,11 +276,40 @@
 </ul>
 ]]></content>
       <categories>
-        <category>阅读</category>
+        <category>reading</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
         <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>撰写博客(Hexo + Github)</title>
+    <url>/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="新建md文件"><a href="#新建md文件" class="headerlink" title="新建md文件"></a>新建md文件</h1><ul>
+<li><code>hexo n filename</code> – 在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>参照<a href="https://markdown.com.cn/basic-syntax/">Markdown 官方教程</a>编写文章内容<span id="more"></span></li>
+</ul>
+<h1 id="新建草稿"><a href="#新建草稿" class="headerlink" title="新建草稿"></a>新建草稿</h1><ul>
+<li><code>hexo n draft filename</code> – 在&#x2F;source&#x2F;_drafts文件夹下生成一个filename.md</li>
+<li><code>hexo publish filename</code> – 发布文章，将md文件移动到&#x2F;source&#x2F;_posts下</li>
+</ul>
+<h1 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h1><ul>
+<li>为了实现结构化管理每篇博客的图像，将_config.yml中的post_asset_folder设置为true，并加入以下内容<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
+<li>配置文件修改完成后，每次运行<code>hexo n filename</code>都会在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md和一个&#x2F;filename文件夹</li>
+<li>插入图片<ul>
+<li>将需要加载的图片放入到与当前博客同名的文件夹下</li>
+<li>在需要插入图片的位置插入以下代码 <code>&#123;% asset_img 随便什么名.png 想要插入的图片名 %&#125;</code>，即可在网页上加载出来</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>experience</category>
+      </categories>
+      <tags>
+        <tag>blog</tag>
+        <tag>Hexo</tag>
       </tags>
   </entry>
   <entry>
@@ -353,35 +382,6 @@
 <li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
 <img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
 <li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>experience</category>
-      </categories>
-      <tags>
-        <tag>blog</tag>
-        <tag>Hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>撰写博客(Hexo + Github)</title>
-    <url>/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="新建md文件"><a href="#新建md文件" class="headerlink" title="新建md文件"></a>新建md文件</h1><ul>
-<li><code>hexo n filename</code> – 在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
-<li>参照<a href="https://markdown.com.cn/basic-syntax/">Markdown 官方教程</a>编写文章内容<span id="more"></span></li>
-</ul>
-<h1 id="新建草稿"><a href="#新建草稿" class="headerlink" title="新建草稿"></a>新建草稿</h1><ul>
-<li><code>hexo n draft filename</code> – 在&#x2F;source&#x2F;_drafts文件夹下生成一个filename.md</li>
-<li><code>hexo publish filename</code> – 发布文章，将md文件移动到&#x2F;source&#x2F;_posts下</li>
-</ul>
-<h1 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h1><ul>
-<li>为了实现结构化管理每篇博客的图像，将_config.yml中的post_asset_folder设置为true，并加入以下内容<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
-<li>配置文件修改完成后，每次运行<code>hexo n filename</code>都会在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md和一个&#x2F;filename文件夹</li>
-<li>插入图片<ul>
-<li>将需要加载的图片放入到与当前博客同名的文件夹下</li>
-<li>在需要插入图片的位置插入以下代码 <code>&#123;% asset_img 随便什么名.png 想要插入的图片名 %&#125;</code>，即可在网页上加载出来</li>
 </ul>
 </li>
 </ul>
