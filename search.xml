@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Welcome</title>
-    <url>/2024/05/23/Welcome/</url>
-    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
-]]></content>
-  </entry>
-  <entry>
     <title>《MySQL是怎样运行的》(一)</title>
     <url>/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/</url>
     <content><![CDATA[<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="客户端-服务器架构"><a href="#客户端-服务器架构" class="headerlink" title="客户端&#x2F;服务器架构"></a>客户端&#x2F;服务器架构</h2><ul>
@@ -54,6 +48,94 @@
       <tags>
         <tag>MySQL</tag>
         <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Welcome</title>
+    <url>/2024/05/23/Welcome/</url>
+    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
+]]></content>
+  </entry>
+  <entry>
+    <title>搭建个人博客(Hexo + Github)</title>
+    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
+<span id="more"></span>
+
+<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
+<li>安装node.js</li>
+<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>安装博客网站的框架Hexo<ul>
+<li>在Github新建一个仓库</li>
+<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
+<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
+<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
+<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
+本地部署完成</li>
+</ul>
+</li>
+<li>将Hexo部署到Github<ul>
+<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
+<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
+<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
+部署成功</li>
+</ul>
+</li>
+<li>绑定域名<ul>
+<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
+<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
+<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
+<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
+<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
+<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
+<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
+</ul>
+</li>
+</ul>
+<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
+<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
+<li>以Cactus主题为例<ul>
+<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
+<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
+<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
+<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
+<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
+<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>experience</category>
+      </categories>
+      <tags>
+        <tag>blog</tag>
+        <tag>Hexo</tag>
       </tags>
   </entry>
   <entry>
@@ -269,9 +351,128 @@
 </tr>
 </tbody></table>
 </li>
-<li><p>文件头</p>
+<li><p>文件头<br>文件头是页结构的第一部分，占用38字节，其各个部分的作用如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">占用空间（字节）</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">FIL_PAGE_SPACE_OR_CHKSUM</td>
+<td align="center">4</td>
+<td align="center">在MySQL4.0.14之后的版本中，该属性表示页的校验和</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_OFFSET</td>
+<td align="center">4</td>
+<td align="center">页号</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_PREV</td>
+<td align="center">4</td>
+<td align="center">上一页的页号</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_NEXT</td>
+<td align="center">4</td>
+<td align="center">下一页的页号</td>
+</tr>
+<tr>
+<td align="center">FILE_PAGE_LSN</td>
+<td align="center">8</td>
+<td align="center">页面被最后修改时对应的LSN值（Log Sequence Number,日志序列号）</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_TYPE</td>
+<td align="center">2</td>
+<td align="center">该页的类型</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_FILE_FLUSH_LSN</td>
+<td align="center">8</td>
+<td align="center">仅在系统表空间的第一个页中定义，代表文件至少被刷新到了对应的LSN值</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_ARCH_LOG_NO_OR_SPACE_ID</td>
+<td align="center">4</td>
+<td align="center">页属于哪个表空间</td>
+</tr>
+</tbody></table>
+<p>其中FIL_PAGE_TYPE表示某个页面的类型，包括日志页、溢出页等，其可能的值见下表。</p>
+<table>
+<thead>
+<tr>
+<th align="center">类型名称</th>
+<th align="center">值</th>
+<th align="center">类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">FIL_PAGE_TYPE_ALLOCATED</td>
+<td align="center">0x0000</td>
+<td align="center">新分配未使用</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_UNDO_LOG</td>
+<td align="center">0x002</td>
+<td align="center">undo日志页</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_INODE</td>
+<td align="center">0x003</td>
+<td align="center">存储段信息</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_IBUF_FREE_LIST</td>
+<td align="center">0x004</td>
+<td align="center">Change Buffer空闲列表</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_IBUF_BITMAP</td>
+<td align="center">0x005</td>
+<td align="center">Change Buffer的属性</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_TYPE_SYS</td>
+<td align="center">0x006</td>
+<td align="center">系统数据</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_TYPE_TRX_SYS</td>
+<td align="center">0x007</td>
+<td align="center">事务系统数据</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_TYPE_FSP_HDR</td>
+<td align="center">0x008</td>
+<td align="center">表空间头部信息</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_TYPE_XDES</td>
+<td align="center">0x009</td>
+<td align="center">存储区的属性</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_TYPE_BLOB</td>
+<td align="center">0x00A</td>
+<td align="center">溢出页</td>
+</tr>
+<tr>
+<td align="center">FIL_PAGE_INDEX</td>
+<td align="center">0x45BF</td>
+<td align="center">索引页，也就是我们说的数据页</td>
+</tr>
+</tbody></table>
 </li>
 <li><p>文件尾</p>
+<ol>
+<li>文件尾是页的最后一部分，占用8个字节。主要用于进行页面的校验。</li>
+<li>文件尾的前4个字节是该页面的校验和，正常情况下其值等于文件头中的校验和。如果该页面被修改，会重新计算这两个部分的校验和。当该页面被刷新到磁盘中时，由于文件头在前，其值会被先写入磁盘。如果刷新页面的过程中发生了断电，重启服务后只需比较页面中的两个校验和即可，如果两个校验和相等，说明该页刷新成功，否则说明该页在刷新过程中发生了错误。</li>
+<li>文件尾的后四个字节表示最后修改时对应的LSN的值，正常情况下与文件头中的FILE_PAGE_LSN相等。</li>
+</ol>
 </li>
 </ul>
 ]]></content>
@@ -281,88 +482,6 @@
       <tags>
         <tag>MySQL</tag>
         <tag>数据库</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>搭建个人博客(Hexo + Github)</title>
-    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
-<span id="more"></span>
-
-<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
-<li>安装node.js</li>
-<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
-<li>安装博客网站的框架Hexo<ul>
-<li>在Github新建一个仓库</li>
-<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
-<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
-<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
-<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
-<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
-本地部署完成</li>
-</ul>
-</li>
-<li>将Hexo部署到Github<ul>
-<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
-<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
-<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
-<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
-部署成功</li>
-</ul>
-</li>
-<li>绑定域名<ul>
-<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
-<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
-<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
-<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
-<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
-<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
-<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
-<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
-</ul>
-</li>
-</ul>
-<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
-<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
-<li>以Cactus主题为例<ul>
-<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
-<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
-<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
-<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
-<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
-<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
-<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>experience</category>
-      </categories>
-      <tags>
-        <tag>blog</tag>
-        <tag>Hexo</tag>
       </tags>
   </entry>
   <entry>
