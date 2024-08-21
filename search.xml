@@ -1,65 +1,187 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Gnutls源码安装小记</title>
+    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
+<li><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)<ol>
+<li>安装nettle（源码安装或者sudo apt安装）</li>
+<li>找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如<ul>
+<li>export PKG_CONFIG_PATH&#x3D;”&#x2F;usr&#x2F;local&#x2F;lib64&#x2F;pkgconfig:$PKG_CONFIG_PATH”</li>
+</ul>
+</li>
+<li>重新编译 <ul>
+<li>.&#x2F;configure –with-included-libtasn1 –with-included-unistring</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><code>nettlex.so not found</code><ol>
+<li>找到nettlex.so的地址，手动设置共享库地址 <ul>
+<li>export LD_LIBRARY_PATH&#x3D;&#x2F;usr&#x2F;local&#x2F;lib64:$LD_LIBRARY_PATH</li>
+</ul>
+</li>
+<li>更新缓存<ul>
+<li>echo “&#x2F;usr&#x2F;local&#x2F;lib64” | sudo tee &#x2F;etc&#x2F;ld.so.conf.d&#x2F;local-lib.conf</li>
+<li>sudo ldconfig</li>
+</ul>
+</li>
+<li>重新编译<ul>
+<li>sudo make clean</li>
+<li>.&#x2F;configure –with-included-libtasn1 –with-included-unistring</li>
+<li>sudo make</li>
+<li>sudo make install</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> <ol>
+<li>清理<ul>
+<li>sudo make clean</li>
+</ul>
+</li>
+<li>禁用文档生成<ul>
+<li>.&#x2F;configure –with-included-libtasn1 –with-included-unistring –disable-doc</li>
+<li>sudo make</li>
+<li>sudo make install</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>experience</category>
+      </categories>
+      <tags>
+        <tag>Gnutls</tag>
+        <tag>SSL</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Welcome</title>
     <url>/2024/05/23/Welcome/</url>
     <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
 ]]></content>
   </entry>
   <entry>
-    <title>《MySQL是怎样运行的》(一)</title>
-    <url>/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/</url>
-    <content><![CDATA[<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="客户端-服务器架构"><a href="#客户端-服务器架构" class="headerlink" title="客户端&#x2F;服务器架构"></a>客户端&#x2F;服务器架构</h2><ul>
-<li>mysqld：MySQL服务器程序，运行该程序可以启动一个服务器进程</li>
-<li>mysql：MySQL客户端程序，运行该程序可以发送请求并接收服务器的处理结果 </li>
-<li>客户端与服务器的连接<span id="more"></span>
+    <title>StrongSwan部署小记</title>
+    <url>/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="虚拟机搭建strongswan"><a href="#虚拟机搭建strongswan" class="headerlink" title="虚拟机搭建strongswan"></a>虚拟机搭建strongswan</h1><h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><ul>
+<li><p>操作系统</p>
+<!-- ![image-20240816074401529](E:\lab\IPsec.assets\image-20240816074401529.png) -->
+<img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image1.png" class="" title="image1">
+</li>
+<li><p>配置环境</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install libgmp-dev libssl-dev libcurl4-openssl-dev libsystemd-dev libjson-c-dev make gcc pkg-config libsystemd-dev</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装过程</p>
 <ul>
-<li>本质：进程间通信</li>
-<li>网络通信协议：TCP&#x2F;IP</li>
-<li>服务器默认端口：3306</li>
-<li>服务器处理的流程：连接管理 -&gt; 解析与优化 -&gt; 存储引擎<ul>
-<li><strong>连接管理</strong>：客户端可以携带主机信息、用户名与密码等信息，采用TCP&#x2F;TP、命名管道或者共享内存、UNIX套接字等方式连接服务端。每当有客户端信息验证通过，连接到服务器端进程时，服务器端就会创建一个线程进行交互；当通信结束后，并不会立即销毁该线程，而是缓存起来，当有新的客户端连接时，将这个线程分配给新的客户端</li>
-<li><strong>解析与优化</strong>：查询缓存 -&gt; 语法解析 -&gt; 查询优化<ol>
-<li>查询缓存 – 同样的请求会从缓存中查找结果，但是如果两个请求有任何字符上的不同，都会重新计算</li>
-<li>查询优化 – 优化的结果是生成一个执行计划，可以通过<code>explain</code>来查看</li>
-</ol>
+<li><p>下载源码并编译</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">wget https://download.strongswan.org/strongswan-5.8.3.tar.gz</span><br><span class="line">tar xzf strongswan-5.8.3.tar.gz</span><br><span class="line">cd strongswan-5.8.3</span><br><span class="line">./configure --prefix=/usr --sysconfdir=/etc --enable-eap-identity --enable-eap-md5 --enable-eap-mschapv2 --enable-eap-tls --enable-eap-ttls --enable-eap-peap --enable-eap-tnc --enable-eap-dynamic --enable-eap-radius --enable-xauth-eap --enable-xauth-pam  --enable-dhcp  --enable-openssl  --enable-addrblock --enable-unity --enable-certexpire --enable-radattr --enable-swanctl --enable-openssl --disable-gmp --enable-systemd</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<p>安装成功</p>
+<!-- ![image-20240816080528752](E:\lab\IPsec.assets\image-20240816080528752.png) -->
+<img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image2.png" class="" title="image2">
 </li>
-<li><strong>存储引擎</strong>：默认引擎是InnoDB</li>
+<li><p>生成CA证书和服务器证书</p>
+<p>创建服务器证书时，–dn中的CN要填写本机的ip，–san同理</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">mkdir genPem</span><br><span class="line">cd genPem</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建CA密钥</span></span><br><span class="line">ipsec pki --gen --outform pem &gt; ca-key.pem</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建CA证书</span></span><br><span class="line">ipsec pki --self --in ca-key.pem --dn &quot;C=CN, O=My VPN, CN=My VPN CA&quot; --ca --outform pem &gt; ca-cert.pem</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建服务器密钥</span></span><br><span class="line">ipsec pki --gen --outform pem &gt; server-key.pem</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建服务器证书</span></span><br><span class="line">ipsec pki --pub --in server-key.pem | ipsec pki --issue --cacert ca-cert.pem --cakey ca-key.pem --dn &quot;C=CN, O=My VPN, CN=serverIp&quot; --san=&quot;serverIp&quot; --flag serverAuth --outform pem &gt; server-cert.pem</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将证书和密钥放到正确的位置</span></span><br><span class="line">sudo cp ca-cert.pem /etc/ipsec.d/cacerts/</span><br><span class="line">sudo cp server-cert.pem /etc/ipsec.d/certs/</span><br><span class="line">sudo cp server-key.pem /etc/ipsec.d/private/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置&#x2F;etc&#x2F;ipsec.secrets（这个文件似乎可有可无，稳妥起见还是加上吧）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">: RSA &quot;server-key.pem&quot;</span><br><span class="line">test : EAP &quot;test&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置&#x2F;etc&#x2F;swanctl&#x2F;conf.d&#x2F;192.168.139.129.conf（注意：此处的文件名为本机的ip.conf）</p>
+<p>下面的配置文件中有文字注释的部分需要修改</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">connections &#123;</span><br><span class="line">    ikev2-eap-mschapv2 &#123;</span><br><span class="line">        version = 2</span><br><span class="line">        unique = never</span><br><span class="line">        proposals = aes256-sha1-modp1024</span><br><span class="line">        # proposals = aes256-sha1-modp1024, aes128-sha1-modp1024, 3des-sha1-modp1024</span><br><span class="line">        # proposals = aes256-sha256-prfsha256-modp2048, aes256gcm16-prfsha384-modp1024, default</span><br><span class="line">        rekey_time = 0s</span><br><span class="line">        fragmentation = yes</span><br><span class="line">        dpd_delay = 30s</span><br><span class="line">        send_cert = always</span><br><span class="line">        local_addrs = %any</span><br><span class="line">        local &#123;</span><br><span class="line">            certs = server-cert.pem</span><br><span class="line">            # 服务器ip</span><br><span class="line">            id = 192.168.139.129</span><br><span class="line">        &#125;</span><br><span class="line">        remote &#123;</span><br><span class="line">            auth = eap-mschapv2</span><br><span class="line">            eap_id = %any</span><br><span class="line">            # request_virtual_ip = no</span><br><span class="line">        &#125;</span><br><span class="line">        children &#123;</span><br><span class="line">            ikev2-eap-mschapv2 &#123;</span><br><span class="line">                local_ts = 0.0.0.0/0,::/0</span><br><span class="line">                remote_ts = 0.0.0.0/0</span><br><span class="line">                rekey_time = 0s</span><br><span class="line">                dpd_action = clear</span><br><span class="line">                esp_proposals = aes256-sha256, aes128-sha1, default</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">secrets &#123;</span><br><span class="line">    private-www &#123;</span><br><span class="line">        file = server-key.pem</span><br><span class="line">    &#125;</span><br><span class="line">    # id为用户名，secret为密码</span><br><span class="line">    eap-test &#123;</span><br><span class="line">        id = test</span><br><span class="line">        secret = &quot;123456&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+</li>
+<li><p>启动服务</p>
+<p>注：直接启动strongswan时会有一个报错，提示没有这个service，直接把报错信息复制给GPT就行，我也忘记具体的指令了，就是创建一个文件使其能启动strongswan ipsec</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo systemctl enable strongswan</span><br><span class="line">sudo systemctl start strongswan</span><br><span class="line">sudo systemctl status strongswan</span><br></pre></td></tr></table></figure>
+
+<!-- ![image-20240816083736097](E:\lab\IPsec.assets\image-20240816083736097.png) -->
+<img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image3.png" class="" title="image3"></li>
 </ul>
 </li>
-<li>实现效果：客户端向服务器发送一段文本（SQL语句），服务器进程处理后再向客户端返回一段文本</li>
 </ul>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><ul>
+<li>环境，且两台机器能ping通</li>
+</ul>
+<!-- ![image-20240816100339589](E:\lab\IPsec.assets\image-20240816100339589.png) -->
+<img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image4.png" class="" title="image4">
+
+<ul>
+<li><p>直接命令行安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install strongswan</span><br></pre></td></tr></table></figure>
 </li>
-</ul>
-<h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><ul>
-<li>启动选项<ul>
-<li>命令行修改<br><code>仅对当次启动生效</code> </li>
-<li>配置文件修改<br><code>无论是Linux系统还是Windows系统，都有多个对应的配置文件查找路径，且路径之间有优先级</code></li>
-</ul>
+<li><p>配置 &#x2F;etc&#x2F;ipsec.conf</p>
+<p>带文字注释的要修改</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">config setup</span><br><span class="line">    charondebug=&quot;ike 2, knl 2, cfg 2&quot;</span><br><span class="line"></span><br><span class="line">conn %default</span><br><span class="line">    keyexchange=ikev2</span><br><span class="line">    ike=aes256-sha1-modp1024</span><br><span class="line">    esp=aes256-sha1</span><br><span class="line">    dpdaction=clear</span><br><span class="line">    dpddelay=300s</span><br><span class="line">    rekey=no</span><br><span class="line"></span><br><span class="line">conn ikev2-vpn</span><br><span class="line">    left=192.168.139.129 # 服务器ip</span><br><span class="line">    leftid=192.168.139.129 # 服务器ip</span><br><span class="line">    leftauth = pubkey</span><br><span class="line">    leftcert=server-cert.pem</span><br><span class="line">    leftsendcert=always</span><br><span class="line">    leftsubnet=192.168.139.0/24 # 两台机器所在的网段</span><br><span class="line">    right=192.168.139.130 # 本机ip</span><br><span class="line">    rightid=192.168.139.130 # 本机ip</span><br><span class="line">    rightsubnet=0.0.0.0/0</span><br><span class="line">    rightauth=eap-mschapv2</span><br><span class="line">    rightsendcert=never</span><br><span class="line">    eap_identity=test</span><br><span class="line">    auto=add</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 </li>
-<li>系统变量<ul>
-<li>系统变量有不同的作用范围，包括GLOBAL和SESSION</li>
-<li>大部分的系统变量可以当作启动项来设置，但是有些系统变量是程序运行过程中自动生成，无法修改</li>
-</ul>
+<li><p>证书和私钥</p>
+<p>把在服务端生成的对应文件也放到客户端对应的目录下</p>
+<!-- ![image-20240820171519672](E:\lab\strongswan\strongswan安装文档.assets\image-20240820171519672.png) -->
+<img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image5.png" class="" title="image5">
 </li>
+<li><p>配置<code>/etc/ipsec.secrets</code></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">test : EAP &quot;test&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>客户端启动</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo ipsec restart</span><br><span class="line">sudo ipsec up ikev2-vpn</span><br></pre></td></tr></table></figure></li>
 </ul>
-<h2 id="字符集和比较规则"><a href="#字符集和比较规则" class="headerlink" title="字符集和比较规则"></a>字符集和比较规则</h2><ul>
-<li>将字符映射成二进制称为编码，反之为解码。人们抽象出一个字符集的概念来描述某个字符范围的编码规则<br><code>常见字符集：ASCII、ISO8859-1、GB2312等</code></li>
-<li>每个字符集有多个比较规则，比如是否区分重音、是否区分大小写等</li>
-</ul>
-]]></content>
+<h2 id="成功"><a href="#成功" class="headerlink" title="成功"></a>成功</h2><p>客户端</p>
+<!-- ![image-20240820165034674](E:\lab\IPsec.assets\image-20240820165034674.png) -->
+<img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image6.png" class="" title="image6">
+
+<p>服务端</p>
+<!-- ![image-20240820165401813](E:\lab\IPsec.assets\image-20240820165401813.png) -->
+<img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image7.png" class="" title="image7">]]></content>
       <categories>
-        <category>reading</category>
+        <category>experience</category>
       </categories>
       <tags>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
+        <tag>Strongswan</tag>
+        <tag>IPsec</tag>
+        <tag>VPN</tag>
       </tags>
   </entry>
   <entry>
     <title>《MySQL是怎样运行的》（三）</title>
     <url>/2024/08/14/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%B8%89%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1>]]></content>
+    <content><![CDATA[<h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li><p>常用的数据结构 - B+树</p>
+<ol>
+<li>高度平衡：所有叶子节点处于同一层</li>
+<li>叶子节点存储索引列和主键值（或索引列和完整数据记录），由双向链表构成</li>
+<li>除了叶子节点外，每个节点可以有多个子节点</li>
+</ol>
+</li>
+<li><p>常见的索引类型</p>
+<ul>
+<li>按叶子节点存放的数据分类：聚簇索引（叶子节点存放完整的数据记录，通常主键作为排序条件）和二级索引（需要回表查询完整的数据记录，通常非主键列作为排序条件）</li>
+<li>覆盖索引：需要查询的内容包含在索引列中</li>
+<li>联合索引：也称复合索引、组合索引，该类型的索引包含了多个数据列，本质也是一个二级索引</li>
+</ul>
+</li>
+<li><p>MyISAM引擎的细节和上述（InnoDB引擎）不完全一样。其将索引和数据分开存储。</p>
+<blockquote>
+<p>所有数据都存放在数据文件中，索引树存放对应的行号，根据行号查找对应的数据记录</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="索引的构建及使用"><a href="#索引的构建及使用" class="headerlink" title="索引的构建及使用"></a>索引的构建及使用</h2><ul>
+<li>InnoDB默认为主键构建一个聚簇索引，叶子节点包含完整的数据记录</li>
+<li>用户可以为非主键构建二级索引，该B+树的非叶子节点存放索引列的值、主键值以及对应下一层索引页的页号，叶子节点存放索引列的值和主键值，需要根据主键值再去聚簇索引查找完整的数据记录，因此被称为二级索引</li>
+<li>索引在逻辑层面上是B+树，在物理层面上是以页的形式存放，每一页都是同一层的节点，且页与页之间有双向指针相连。页内按照索引列的值大小排成单向链表。</li>
+<li>索引页的布局与数据页类似，每一页都分成七个部分，其中数据部分分成若干组，每组中主键大的记录的偏移量会被存储在页目录中的槽中。</li>
+<li>进行检索时，每条索引指向与其值相等的第一条记录所在的位置。</li>
+</ul>
+<h2 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h2>]]></content>
       <categories>
         <category>reading</category>
       </categories>
@@ -405,6 +527,56 @@
 <li>文件尾的后四个字节表示最后修改时对应的LSN的值，正常情况下与文件头中的FILE_PAGE_LSN相等。</li>
 </ol>
 </li>
+</ul>
+]]></content>
+      <categories>
+        <category>reading</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《MySQL是怎样运行的》(一)</title>
+    <url>/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/</url>
+    <content><![CDATA[<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="客户端-服务器架构"><a href="#客户端-服务器架构" class="headerlink" title="客户端&#x2F;服务器架构"></a>客户端&#x2F;服务器架构</h2><ul>
+<li>mysqld：MySQL服务器程序，运行该程序可以启动一个服务器进程</li>
+<li>mysql：MySQL客户端程序，运行该程序可以发送请求并接收服务器的处理结果 </li>
+<li>客户端与服务器的连接<span id="more"></span>
+<ul>
+<li>本质：进程间通信</li>
+<li>网络通信协议：TCP&#x2F;IP</li>
+<li>服务器默认端口：3306</li>
+<li>服务器处理的流程：连接管理 -&gt; 解析与优化 -&gt; 存储引擎<ul>
+<li><strong>连接管理</strong>：客户端可以携带主机信息、用户名与密码等信息，采用TCP&#x2F;TP、命名管道或者共享内存、UNIX套接字等方式连接服务端。每当有客户端信息验证通过，连接到服务器端进程时，服务器端就会创建一个线程进行交互；当通信结束后，并不会立即销毁该线程，而是缓存起来，当有新的客户端连接时，将这个线程分配给新的客户端</li>
+<li><strong>解析与优化</strong>：查询缓存 -&gt; 语法解析 -&gt; 查询优化<ol>
+<li>查询缓存 – 同样的请求会从缓存中查找结果，但是如果两个请求有任何字符上的不同，都会重新计算</li>
+<li>查询优化 – 优化的结果是生成一个执行计划，可以通过<code>explain</code>来查看</li>
+</ol>
+</li>
+<li><strong>存储引擎</strong>：默认引擎是InnoDB</li>
+</ul>
+</li>
+<li>实现效果：客户端向服务器发送一段文本（SQL语句），服务器进程处理后再向客户端返回一段文本</li>
+</ul>
+</li>
+</ul>
+<h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><ul>
+<li>启动选项<ul>
+<li>命令行修改<br><code>仅对当次启动生效</code> </li>
+<li>配置文件修改<br><code>无论是Linux系统还是Windows系统，都有多个对应的配置文件查找路径，且路径之间有优先级</code></li>
+</ul>
+</li>
+<li>系统变量<ul>
+<li>系统变量有不同的作用范围，包括GLOBAL和SESSION</li>
+<li>大部分的系统变量可以当作启动项来设置，但是有些系统变量是程序运行过程中自动生成，无法修改</li>
+</ul>
+</li>
+</ul>
+<h2 id="字符集和比较规则"><a href="#字符集和比较规则" class="headerlink" title="字符集和比较规则"></a>字符集和比较规则</h2><ul>
+<li>将字符映射成二进制称为编码，反之为解码。人们抽象出一个字符集的概念来描述某个字符范围的编码规则<br><code>常见字符集：ASCII、ISO8859-1、GB2312等</code></li>
+<li>每个字符集有多个比较规则，比如是否区分重音、是否区分大小写等</li>
 </ul>
 ]]></content>
       <categories>
