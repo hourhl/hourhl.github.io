@@ -62,15 +62,10 @@
       </tags>
   </entry>
   <entry>
-    <title>Welcome</title>
-    <url>/2024/05/23/Welcome/</url>
-    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
-]]></content>
-  </entry>
-  <entry>
     <title>StrongSwan部署小记</title>
     <url>/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="虚拟机搭建strongswan"><a href="#虚拟机搭建strongswan" class="headerlink" title="虚拟机搭建strongswan"></a>虚拟机搭建strongswan</h1><h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><ul>
+    <content><![CDATA[<h1 id="虚拟机搭建strongswan"><a href="#虚拟机搭建strongswan" class="headerlink" title="虚拟机搭建strongswan"></a>虚拟机搭建strongswan</h1><p>注：仅作测试用，故服务端和客户端分别安装在了同一网段下的两台Ubuntu上。</p>
+<h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><ul>
 <li><p>操作系统</p>
 <!-- ![image-20240816074401529](E:\lab\IPsec.assets\image-20240816074401529.png) -->
 <img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image1.png" class="" title="image1">
@@ -110,7 +105,7 @@
 </li>
 </ul>
 <h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><ul>
-<li>环境，且两台机器能ping通</li>
+<li>操作系统</li>
 </ul>
 <!-- ![image-20240816100339589](E:\lab\IPsec.assets\image-20240816100339589.png) -->
 <img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image4.png" class="" title="image4">
@@ -148,6 +143,62 @@
         <tag>Strongswan</tag>
         <tag>IPsec</tag>
         <tag>VPN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Welcome</title>
+    <url>/2024/05/23/Welcome/</url>
+    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
+]]></content>
+  </entry>
+  <entry>
+    <title>《MySQL是怎样运行的》(一)</title>
+    <url>/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/</url>
+    <content><![CDATA[<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="客户端-服务器架构"><a href="#客户端-服务器架构" class="headerlink" title="客户端&#x2F;服务器架构"></a>客户端&#x2F;服务器架构</h2><ul>
+<li>mysqld：MySQL服务器程序，运行该程序可以启动一个服务器进程</li>
+<li>mysql：MySQL客户端程序，运行该程序可以发送请求并接收服务器的处理结果 </li>
+<li>客户端与服务器的连接<span id="more"></span>
+<ul>
+<li>本质：进程间通信</li>
+<li>网络通信协议：TCP&#x2F;IP</li>
+<li>服务器默认端口：3306</li>
+<li>服务器处理的流程：连接管理 -&gt; 解析与优化 -&gt; 存储引擎<ul>
+<li><strong>连接管理</strong>：客户端可以携带主机信息、用户名与密码等信息，采用TCP&#x2F;TP、命名管道或者共享内存、UNIX套接字等方式连接服务端。每当有客户端信息验证通过，连接到服务器端进程时，服务器端就会创建一个线程进行交互；当通信结束后，并不会立即销毁该线程，而是缓存起来，当有新的客户端连接时，将这个线程分配给新的客户端</li>
+<li><strong>解析与优化</strong>：查询缓存 -&gt; 语法解析 -&gt; 查询优化<ol>
+<li>查询缓存 – 同样的请求会从缓存中查找结果，但是如果两个请求有任何字符上的不同，都会重新计算</li>
+<li>查询优化 – 优化的结果是生成一个执行计划，可以通过<code>explain</code>来查看</li>
+</ol>
+</li>
+<li><strong>存储引擎</strong>：默认引擎是InnoDB</li>
+</ul>
+</li>
+<li>实现效果：客户端向服务器发送一段文本（SQL语句），服务器进程处理后再向客户端返回一段文本</li>
+</ul>
+</li>
+</ul>
+<h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><ul>
+<li>启动选项<ul>
+<li>命令行修改<br><code>仅对当次启动生效</code> </li>
+<li>配置文件修改<br><code>无论是Linux系统还是Windows系统，都有多个对应的配置文件查找路径，且路径之间有优先级</code></li>
+</ul>
+</li>
+<li>系统变量<ul>
+<li>系统变量有不同的作用范围，包括GLOBAL和SESSION</li>
+<li>大部分的系统变量可以当作启动项来设置，但是有些系统变量是程序运行过程中自动生成，无法修改</li>
+</ul>
+</li>
+</ul>
+<h2 id="字符集和比较规则"><a href="#字符集和比较规则" class="headerlink" title="字符集和比较规则"></a>字符集和比较规则</h2><ul>
+<li>将字符映射成二进制称为编码，反之为解码。人们抽象出一个字符集的概念来描述某个字符范围的编码规则<br><code>常见字符集：ASCII、ISO8859-1、GB2312等</code></li>
+<li>每个字符集有多个比较规则，比如是否区分重音、是否区分大小写等</li>
+</ul>
+]]></content>
+      <categories>
+        <category>reading</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
@@ -527,56 +578,6 @@
 <li>文件尾的后四个字节表示最后修改时对应的LSN的值，正常情况下与文件头中的FILE_PAGE_LSN相等。</li>
 </ol>
 </li>
-</ul>
-]]></content>
-      <categories>
-        <category>reading</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>《MySQL是怎样运行的》(一)</title>
-    <url>/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/</url>
-    <content><![CDATA[<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="客户端-服务器架构"><a href="#客户端-服务器架构" class="headerlink" title="客户端&#x2F;服务器架构"></a>客户端&#x2F;服务器架构</h2><ul>
-<li>mysqld：MySQL服务器程序，运行该程序可以启动一个服务器进程</li>
-<li>mysql：MySQL客户端程序，运行该程序可以发送请求并接收服务器的处理结果 </li>
-<li>客户端与服务器的连接<span id="more"></span>
-<ul>
-<li>本质：进程间通信</li>
-<li>网络通信协议：TCP&#x2F;IP</li>
-<li>服务器默认端口：3306</li>
-<li>服务器处理的流程：连接管理 -&gt; 解析与优化 -&gt; 存储引擎<ul>
-<li><strong>连接管理</strong>：客户端可以携带主机信息、用户名与密码等信息，采用TCP&#x2F;TP、命名管道或者共享内存、UNIX套接字等方式连接服务端。每当有客户端信息验证通过，连接到服务器端进程时，服务器端就会创建一个线程进行交互；当通信结束后，并不会立即销毁该线程，而是缓存起来，当有新的客户端连接时，将这个线程分配给新的客户端</li>
-<li><strong>解析与优化</strong>：查询缓存 -&gt; 语法解析 -&gt; 查询优化<ol>
-<li>查询缓存 – 同样的请求会从缓存中查找结果，但是如果两个请求有任何字符上的不同，都会重新计算</li>
-<li>查询优化 – 优化的结果是生成一个执行计划，可以通过<code>explain</code>来查看</li>
-</ol>
-</li>
-<li><strong>存储引擎</strong>：默认引擎是InnoDB</li>
-</ul>
-</li>
-<li>实现效果：客户端向服务器发送一段文本（SQL语句），服务器进程处理后再向客户端返回一段文本</li>
-</ul>
-</li>
-</ul>
-<h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><ul>
-<li>启动选项<ul>
-<li>命令行修改<br><code>仅对当次启动生效</code> </li>
-<li>配置文件修改<br><code>无论是Linux系统还是Windows系统，都有多个对应的配置文件查找路径，且路径之间有优先级</code></li>
-</ul>
-</li>
-<li>系统变量<ul>
-<li>系统变量有不同的作用范围，包括GLOBAL和SESSION</li>
-<li>大部分的系统变量可以当作启动项来设置，但是有些系统变量是程序运行过程中自动生成，无法修改</li>
-</ul>
-</li>
-</ul>
-<h2 id="字符集和比较规则"><a href="#字符集和比较规则" class="headerlink" title="字符集和比较规则"></a>字符集和比较规则</h2><ul>
-<li>将字符映射成二进制称为编码，反之为解码。人们抽象出一个字符集的概念来描述某个字符范围的编码规则<br><code>常见字符集：ASCII、ISO8859-1、GB2312等</code></li>
-<li>每个字符集有多个比较规则，比如是否区分重音、是否区分大小写等</li>
 </ul>
 ]]></content>
       <categories>
