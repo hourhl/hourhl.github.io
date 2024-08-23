@@ -7,50 +7,19 @@
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
 
 <h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
-<li><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)<ol>
-<li>安装nettle（源码安装或者sudo apt安装）</li>
-<li>找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如<ul>
-<li>export PKG_CONFIG_PATH&#x3D;”&#x2F;usr&#x2F;local&#x2F;lib64&#x2F;pkgconfig:$PKG_CONFIG_PATH”</li>
-</ul>
+<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
 </li>
-<li>重新编译 <ul>
-<li>.&#x2F;configure –with-included-libtasn1 –with-included-unistring</li>
-</ul>
+<li><p><code>nettlex.so not found</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
 </li>
-</ol>
+<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
 </li>
-<li><code>nettlex.so not found</code><ol>
-<li>找到nettlex.so的地址，手动设置共享库地址 <ul>
-<li>export LD_LIBRARY_PATH&#x3D;&#x2F;usr&#x2F;local&#x2F;lib64:$LD_LIBRARY_PATH</li>
-</ul>
-</li>
-<li>更新缓存<ul>
-<li>echo “&#x2F;usr&#x2F;local&#x2F;lib64” | sudo tee &#x2F;etc&#x2F;ld.so.conf.d&#x2F;local-lib.conf</li>
-<li>sudo ldconfig</li>
-</ul>
-</li>
-<li>重新编译<ul>
-<li>sudo make clean</li>
-<li>.&#x2F;configure –with-included-libtasn1 –with-included-unistring</li>
-<li>sudo make</li>
-<li>sudo make install</li>
-</ul>
-</li>
-</ol>
-</li>
-<li><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> <ol>
-<li>清理<ul>
-<li>sudo make clean</li>
-</ul>
-</li>
-<li>禁用文档生成<ul>
-<li>.&#x2F;configure –with-included-libtasn1 –with-included-unistring –disable-doc</li>
-<li>sudo make</li>
-<li>sudo make install</li>
-</ul>
-</li>
-</ol>
-</li>
+<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
+<li><p><code>libev4 was not found.</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
 </ol>
 ]]></content>
       <categories>
@@ -71,8 +40,11 @@
 <img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image1.png" class="" title="image1">
 </li>
 <li><p>配置环境</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install libgmp-dev libssl-dev libcurl4-openssl-dev libsystemd-dev libjson-c-dev make gcc pkg-config libsystemd-dev</span><br></pre></td></tr></table></figure>
 </li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install libgmp-dev libssl-dev libcurl4-openssl-dev libsystemd-dev libjson-c-dev make gcc pkg-config libsystemd-dev</span><br></pre></td></tr></table></figure>
+
+<ul>
 <li><p>安装过程</p>
 <ul>
 <li><p>下载源码并编译</p>
@@ -116,7 +88,7 @@
 </li>
 <li><p>配置 &#x2F;etc&#x2F;ipsec.conf</p>
 <p>带文字注释的要修改</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">config setup</span><br><span class="line">    charondebug=&quot;ike 2, knl 2, cfg 2&quot;</span><br><span class="line"></span><br><span class="line">conn %default</span><br><span class="line">    keyexchange=ikev2</span><br><span class="line">    ike=aes256-sha1-modp1024</span><br><span class="line">    esp=aes256-sha1</span><br><span class="line">    dpdaction=clear</span><br><span class="line">    dpddelay=300s</span><br><span class="line">    rekey=no</span><br><span class="line"></span><br><span class="line">conn ikev2-vpn</span><br><span class="line">    left=192.168.139.129 # 服务器ip</span><br><span class="line">    leftid=192.168.139.129 # 服务器ip</span><br><span class="line">    leftauth = pubkey</span><br><span class="line">    leftcert=server-cert.pem</span><br><span class="line">    leftsendcert=always</span><br><span class="line">    leftsubnet=192.168.139.0/24 # 两台机器所在的网段</span><br><span class="line">    right=192.168.139.130 # 本机ip</span><br><span class="line">    rightid=192.168.139.130 # 本机ip</span><br><span class="line">    rightsubnet=0.0.0.0/0</span><br><span class="line">    rightauth=eap-mschapv2</span><br><span class="line">    rightsendcert=never</span><br><span class="line">    eap_identity=test</span><br><span class="line">    auto=add</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">config setup</span><br><span class="line">    charondebug=&quot;ike 2, knl 2, cfg 2&quot;</span><br><span class="line"></span><br><span class="line">conn %default</span><br><span class="line">    keyexchange=ikev2</span><br><span class="line">    ike=aes256-sha1-modp1024</span><br><span class="line">    esp=aes256-sha1</span><br><span class="line">    dpdaction=clear</span><br><span class="line">    dpddelay=300s</span><br><span class="line">    rekey=no</span><br><span class="line"></span><br><span class="line">conn ikev2-vpn</span><br><span class="line">    left=192.168.139.129 # 服务器ip</span><br><span class="line">    leftid=192.168.139.129 # 服务器ip</span><br><span class="line">    leftauth = pubkey</span><br><span class="line">    leftcert=server-cert.pem</span><br><span class="line">    leftsendcert=always</span><br><span class="line">    leftsubnet=192.168.139.0/24 # 两台机器所在的网段</span><br><span class="line">    right=192.168.139.130 # 本机ip</span><br><span class="line">    rightid=192.168.139.130 # 本机ip</span><br><span class="line">    rightsubnet=0.0.0.0/0</span><br><span class="line">    rightauth=eap-mschapv2</span><br><span class="line">    rightsendcert=never</span><br><span class="line">    eap_identity=test</span><br><span class="line">    auto=add</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>证书和私钥</p>
 <p>把在服务端生成的对应文件也放到客户端对应的目录下</p>
@@ -127,7 +99,7 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">test : EAP &quot;test&quot;</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>客户端启动</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo ipsec restart</span><br><span class="line">sudo ipsec up ikev2-vpn</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo ipsec restart</span><br><span class="line">sudo ipsec up ikev2-vpn</span><br></pre></td></tr></table></figure></li>
 </ul>
 <h2 id="成功"><a href="#成功" class="headerlink" title="成功"></a>成功</h2><p>客户端</p>
 <!-- ![image-20240820165034674](E:\lab\IPsec.assets\image-20240820165034674.png) -->
@@ -192,6 +164,36 @@
 <li>将字符映射成二进制称为编码，反之为解码。人们抽象出一个字符集的概念来描述某个字符范围的编码规则<br><code>常见字符集：ASCII、ISO8859-1、GB2312等</code></li>
 <li>每个字符集有多个比较规则，比如是否区分重音、是否区分大小写等</li>
 </ul>
+<h2 id="数据存放"><a href="#数据存放" class="headerlink" title="数据存放"></a>数据存放</h2><h3 id="数据目录"><a href="#数据目录" class="headerlink" title="数据目录"></a>数据目录</h3><ul>
+<li>MySQL会将数据存放到数据目录下，可以在客户端<code>show variables like &#39;datadir&#39;</code>来查看数据目录</li>
+<li>数据目录中存放着系统数据库、用户自定义的数据库以及一些系统相关文件<blockquote>
+<ul>
+<li><code>mysql</code> 系统数据库，在数据目录下有对应的子文件夹。该数据库存储MySQL的用户账户和权限信息、一些存储过程和事件的定义信息、一些运行过程中产生的日志信息、一些帮助信息以及时区信息等。</li>
+<li><code>performance_schema</code> 系统数据库，在数据目录下有对应的子文件夹。该数据库主要保存MySQL服务器运行过程中的状态信息，包括统计最近执行了哪些语句、在执行过程的每个阶段花费了多长时间、内存的使用情况等。</li>
+<li><code>information_schema</code> 系统数据库，在数据目录下<strong>没有</strong>对应的文件夹。该数据库保存着MySQL服务器维护的所有其他数据库的信息，比如有哪些表、视图、触发器、列、索引等。并不是真实的数据，而是以描述性信息的形式存在，也称之为元数据。</li>
+<li><code>sys</code> 系统数据库，在数据目录下有对应的文件夹。主要通过视图的形式把information_schema和performance_schema结合起来，让开发人员更方便地了解MySQL服务器的性能。</li>
+<li><code>用户数据库</code> 用户自定义的数据库，在数据目录下有对应的子文件夹。详细信息见下文。</li>
+<li><code>服务器进程文件</code> 一个服务器程序对应着一个进程，该文件存储着相关的进程ID</li>
+<li><code>服务器日志文件</code> 包括查询日志、错误日志、二进制日志、redo日志等</li>
+<li><code>SSL和RSA证书与密钥文件</code></li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h3 id="用户数据库"><a href="#用户数据库" class="headerlink" title="用户数据库"></a>用户数据库</h3><ul>
+<li>当用户创建了一个数据库，系统就会在数据目录下创建一个同名的文件夹，并且在这个文件夹中生成一个名为dp.opt的文件，该文件存储了数据库的相关信息，包括字符集、比较规则等。</li>
+<li>每个数据库对应的子文件夹都有一个描述表结构的文件，名称为<strong>表名.frm</strong>。另外，不同的存储引擎会采用不同的方式存储数据。（即每个数据库对应的子文件夹下有两类文件，一类是描述表结构的文件，一类是数据文件）<ol>
+<li><code>InnoDB</code> 在该引擎中，索引和用户记录都是当作数据来处理。数据存放在数据页中，采用表空间来管理数据页。表空间又包括多种类型，比如系统表空间和独立表空间</li>
+</ol>
+<ul>
+<li><code>系统表空间</code> InnoDB会在文件目录下创建一个名为<strong>ibdata1</strong>，大小为12MB的文件（当容量不够时会自扩展）</li>
+<li><code>独立表空间</code> 在MySQL5.6.6及以后的版本中，默认把数据存放到独立表空间中。每当建立一个新的表，就会创建一个新的独立表空间，其文件名是<strong>表名.ibd</strong>，存放在该表所属的数据库的子文件夹下。</li>
+</ul>
+<ol start="2">
+<li><code>MyISAM</code> 在该引擎中，索引和用户记录是分开存放的。其对应的子文件夹下有三类文件，分别是记录表结构的<strong>表名.ibd</strong>、记录用户记录的<strong>表名.MYD</strong>以及记录索引的<strong>表名.MY1</strong>.</li>
+</ol>
+</li>
+</ul>
 ]]></content>
       <categories>
         <category>reading</category>
@@ -232,7 +234,26 @@
 <li>索引页的布局与数据页类似，每一页都分成七个部分，其中数据部分分成若干组，每组中主键大的记录的偏移量会被存储在页目录中的槽中。</li>
 <li>进行检索时，每条索引指向与其值相等的第一条记录所在的位置。</li>
 </ul>
-<h2 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h2>]]></content>
+<h2 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h2><h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ol>
+<li>提高查找效率</li>
+<li>如果查找的结果需要按照索引条件分组或者排列，也能减少时间开支</li>
+</ol>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ol>
+<li>维护索引需要额外的时间，比如插入数据导致的页面分裂，删除数据导致的索引重新排列等。</li>
+<li>使用索引也需要时间。每次执行查询语句之前，都需要计算不同的索引所需的时间成本，生成一个执行计划。如果索引过多，就有可能导致这个生成执行计划的时间过长。</li>
+<li>建立索引需要占用额外的空间。每创建一个索引就是构建一个新的二叉树，二叉树的节点需要占据空间。</li>
+</ol>
+<h2 id="如何创建合适的索引"><a href="#如何创建合适的索引" class="headerlink" title="如何创建合适的索引"></a>如何创建合适的索引</h2><ul>
+<li><code>为常用作搜索条件的列创建索引</code>  为常出现在WHERE、ORDER BY、GROUP BY子句中的列创建索引，仅出现在查询列表中的列就不必要创建索引</li>
+<li><code>不为含有太多重复值的列创建索引</code>  如果某列中重复的数值很多，该列就不适合作为快速搜索的条件，因此不必要创建索引</li>
+<li><code>索引列的数据类型占用空间尽可能小</code>  为某列创建索引，索引树的节点中就都存放有该列的值，如果值的类型占用的存储空间太大，就会产生不必要的空间消耗。例如使用INT类型就足够表示，就不必要使用BIGINT类型。</li>
+<li><code>为列前缀创建索引</code>  可以将字符串中的前几个字符存放到索引中。</li>
+<li><code>创建覆盖索引</code>  常出现在查询列表中的列可以创建覆盖索引，这样B+树中的叶子节点就有需要的结果，不需要回表查询，减少时间开销。</li>
+<li><code>不要在搜索条件中进行索引列的运算</code>  例如以key列创建了索引，如果WHERE子句中的搜索条件是WHERE key * 2 &lt; 4，那么MySQL将使用全表扫描而不使用索引。</li>
+<li><code>表的主键设置为自动递增</code>  MySQL默认为表格的主键列创建聚簇索引，如果主键不是递增的，那么插入新记录时就有可能导致正好插入到已满的数据页的中间，此时MySQL需要进行页面分裂，并把一些数据移动到新的页面中，造成无谓的性能损耗。</li>
+<li><code>不要创建冗余和重复索引</code>  例如本身已经创建了一个针对key1\key2的联合索引，就不需要单独再为key1创建索引了</li>
+</ul>
+]]></content>
       <categories>
         <category>reading</category>
       </categories>
