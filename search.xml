@@ -1,36 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Gnutls源码安装小记</title>
-    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-
-<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
-<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>nettlex.so not found</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
-<li><p><code>libev4 was not found.</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
-</ol>
-]]></content>
-      <categories>
-        <category>experience</category>
-      </categories>
-      <tags>
-        <tag>Gnutls</tag>
-        <tag>SSL</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>StrongSwan部署小记</title>
     <url>/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/</url>
     <content><![CDATA[<h1 id="虚拟机搭建strongswan"><a href="#虚拟机搭建strongswan" class="headerlink" title="虚拟机搭建strongswan"></a>虚拟机搭建strongswan</h1><p>注：仅作测试用，故服务端和客户端分别安装在了同一网段下的两台Ubuntu上。</p>
@@ -118,6 +88,36 @@
       </tags>
   </entry>
   <entry>
+    <title>Gnutls源码安装小记</title>
+    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
+<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>nettlex.so not found</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
+<li><p><code>libev4 was not found.</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <categories>
+        <category>experience</category>
+      </categories>
+      <tags>
+        <tag>Gnutls</tag>
+        <tag>SSL</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Welcome</title>
     <url>/2024/05/23/Welcome/</url>
     <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
@@ -183,13 +183,11 @@
 <h3 id="用户数据库"><a href="#用户数据库" class="headerlink" title="用户数据库"></a>用户数据库</h3><ul>
 <li>当用户创建了一个数据库，系统就会在数据目录下创建一个同名的文件夹，并且在这个文件夹中生成一个名为dp.opt的文件，该文件存储了数据库的相关信息，包括字符集、比较规则等。</li>
 <li>每个数据库对应的子文件夹都有一个描述表结构的文件，名称为<strong>表名.frm</strong>。另外，不同的存储引擎会采用不同的方式存储数据。（即每个数据库对应的子文件夹下有两类文件，一类是描述表结构的文件，一类是数据文件）<ol>
-<li><code>InnoDB</code> 在该引擎中，索引和用户记录都是当作数据来处理。数据存放在数据页中，采用表空间来管理数据页。表空间又包括多种类型，比如系统表空间和独立表空间</li>
-</ol>
-<ul>
+<li><code>InnoDB</code> 在该引擎中，索引和用户记录都是当作数据来处理。数据存放在数据页中，采用表空间来管理数据页。表空间又包括多种类型，比如系统表空间和独立表空间<ol>
 <li><code>系统表空间</code> InnoDB会在文件目录下创建一个名为<strong>ibdata1</strong>，大小为12MB的文件（当容量不够时会自扩展）</li>
 <li><code>独立表空间</code> 在MySQL5.6.6及以后的版本中，默认把数据存放到独立表空间中。每当建立一个新的表，就会创建一个新的独立表空间，其文件名是<strong>表名.ibd</strong>，存放在该表所属的数据库的子文件夹下。</li>
-</ul>
-<ol start="2">
+</ol>
+</li>
 <li><code>MyISAM</code> 在该引擎中，索引和用户记录是分开存放的。其对应的子文件夹下有三类文件，分别是记录表结构的<strong>表名.ibd</strong>、记录用户记录的<strong>表名.MYD</strong>以及记录索引的<strong>表名.MY1</strong>.</li>
 </ol>
 </li>
@@ -607,6 +605,56 @@
       <tags>
         <tag>MySQL</tag>
         <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《MySQL是怎样运行的》（四）</title>
+    <url>/2024/09/06/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E5%9B%9B%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h1><h2 id="单表查询"><a href="#单表查询" class="headerlink" title="单表查询"></a>单表查询</h2><h3 id="访问方法"><a href="#访问方法" class="headerlink" title="访问方法"></a>访问方法</h3><ol>
+<li>MySQL执行查询语句的方式称为访问方法或者访问类型。同一个查询语句可以有多个访问方法来执行，并且查询的结果是一样的，但是所需的成本不一样。</li>
+<li><strong>const</strong> 通过主键或者唯一二级索引列与常数的等值比较的访问方法。如果主键或者二级索引是由多个列来组成，则必须每一列都进行等值比较。<blockquote>
+<ul>
+<li>该访问方法被认为是常数级别的</li>
+<li>如果对于唯一二级索引查询的列的值定位NULL时，不采用const访问方法。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>ref</strong> 通过二级索引列与常数进行等值比较，并且形成的扫描区间为单点扫描区间的访问方法。<blockquote>
+<ul>
+<li>采用二级索引来进行查询时，每找到一条符合条件的二级索引，都会立即回表查询，不是得到所有的主键id再进行回表。</li>
+<li>当查询的值为NULL时，最多只能使用ref查询方法。</li>
+<li>对于索引列中包含多个列的索引来说，只要左边的列与常数进行等值比较，都可以用ref，如果是范围比较，就不能用ref。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>ref_or_null</strong> 比ref方法多了搜索条件为NULL。<blockquote>
+<ul>
+<li>值为NULL的记录会被放在索引树的最左边</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>range</strong> 使用索引查询时，对应的扫描区间为若干个单点扫描区间或者范围扫描区间的单表访问方法。</li>
+<li><strong>index</strong> 扫描全部二级索引记录的访问方法。<blockquote>
+<ul>
+<li>index访问方法的应用场景可以如下：查询结果是覆盖索引中对应的列，但是搜索条件不是按索引列的从左到右来的，可能是中间某个列或者某几个列。但是由于所要的结果在索引中已经存在，不需要再次回表查询了，仅需要扫描该索引即可。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>asll</strong> 执行全表扫描的访问方法。</li>
+</ol>
+<h3 id="索引合并"><a href="#索引合并" class="headerlink" title="索引合并"></a>索引合并</h3><ol>
+<li><strong>索引合并</strong> 使用多个索引来完成一次查询的执行方法。即从不同索中扫描到的记录的主键id取交集，再仅利用这些id来回表查询完整记录。</li>
+<li></li>
+</ol>
+<h2 id="连接查询"><a href="#连接查询" class="headerlink" title="连接查询"></a>连接查询</h2>]]></content>
+      <categories>
+        <category>reading</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+        <tag>单表查询</tag>
+        <tag>连接查询</tag>
       </tags>
   </entry>
   <entry>
