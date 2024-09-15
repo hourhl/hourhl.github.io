@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hourhl.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本章主要讲解InnoDB引擎的物理文件存储结构。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《MySQL是怎样运行的》（五）">
+<meta property="og:url" content="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/index.html">
+<meta property="og:site_name" content="hourhl&#39;s blog">
+<meta property="og:description" content="本章主要讲解InnoDB引擎的物理文件存储结构。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/image1.png">
+<meta property="og:image" content="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/image2.png">
+<meta property="og:image" content="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/image3.png">
+<meta property="og:image" content="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/image4.png">
+<meta property="og:image" content="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/image5.png">
+<meta property="og:image" content="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/image6.png">
+<meta property="article:published_time" content="2024-09-15T03:04:12.000Z">
+<meta property="article:modified_time" content="2024-09-15T08:15:43.974Z">
+<meta property="article:author" content="lhl">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="数据页">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/image1.png">
+
+<link rel="canonical" href="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《MySQL是怎样运行的》（五） | hourhl's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">hourhl's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-github">
+
+    <a href="https://github.com/hourhl" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>Github</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hourhl.github.io/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="lhl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hourhl's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《MySQL是怎样运行的》（五）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-09-15 11:04:12 / 修改时间：16:15:43" itemprop="dateCreated datePublished" datetime="2024-09-15T11:04:12+08:00">2024-09-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/reading/" itemprop="url" rel="index"><span itemprop="name">reading</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+            <div class="post-description">本章主要讲解InnoDB引擎的物理文件存储结构。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="InnoDB的表空间"><a href="#InnoDB的表空间" class="headerlink" title="InnoDB的表空间"></a>InnoDB的表空间</h1><h2 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h2><ul>
+<li>《MySQL是怎样运行的（一）》中提到，每创建一个数据库schema，就会在MySQL数据目录下创建一个同名的文件夹schema，当在数据库（指MySQL5.6.6及以后的版本）中创建一个表格table时，默认采用独立表空间，即会在schema文件夹中创建一个同名的frm文件（table.frm）和ibd文件（table.ibd）。其中frm文件记录表格的基本信息，包括表名、列名、列长度、主键以及索引等，ibd文件则存储记录、索引、MVCC等相关信息。</li>
+<li>独立表空间和系统表空间是InnoDB引擎独有的物理文件存储结构，其他引擎比如MyISAM不支持这个概念。</li>
+</ul>
+<h2 id="独立表空间"><a href="#独立表空间" class="headerlink" title="独立表空间"></a>独立表空间</h2><h3 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h3><ul>
+<li>InnoDB是以页的形式存储数据，完整的数据记录是以聚簇索引的形式存放，也就是说，完整的数据记录的存储逻辑也是B+树，不是我们主观上认为的二维表格，即聚簇索引和完整的数据记录不是分开存储的，实际上二者是一体的，聚簇索引就是完整的表格数据。</li>
+<li>每张表格对应的索引数目就是用户设置的索引数加1（聚簇索引）。</li>
+<li>每次往表格中添加记录时，会先更新聚簇索引，再更新相关的二级索引</li>
+<li>B+树的节点就是数据页，数据页之间用指针相连。数据页（也就是INDEX类型的页，详情见《MySQL是怎样运行的（二）》）由七个部分组成，其中首尾部分分别是File Header和File Trailer，这两个部分是所有类型的页面通用的。</li>
+</ul>
+<h3 id="物理结构"><a href="#物理结构" class="headerlink" title="物理结构"></a>物理结构</h3><ul>
+<li>一个idb文件对应一个表格，实际上就是一个独立表空间。每个独立表空间可以划分为多个组，每个组由256个区（extend）组成，每个区默认大小为1MB，即连续的64个页(每个页默认16KB)。<img src="./image1.png" width="60%" height="60%" /></li>
+<li>每个独立表空间中，第一个组最开始的三个页面类型是FSP_HDR\IBUF_BITMAP\INODE，其余组的最开始两个页面类型是XDES\IBUF_BITMAP。（注：每个独立表空间只有一个FSP_HDR类型的页面）</li>
+</ul>
+<h3 id="逻辑结构"><a href="#逻辑结构" class="headerlink" title="逻辑结构"></a>逻辑结构</h3><ul>
+<li>为了减少随机IO，开发者将同一个索引B+树的页面尽可能在物理存储上也放在一起，因此同一个B+树的页面尽可能分配在同一个组，同时将叶子节点和非叶子节点分开存放。</li>
+<li>开发者将每个索引在逻辑上分为两个段，分别是叶子节点段和非叶子节点段。</li>
+<li>段和区的关系<ul>
+<li>段是逻辑上的概念，区是表空间中连续的64个页面</li>
+<li>区有4种分类，分别是空闲区，有剩余页面的碎片区，没有剩余页面的碎片区、属于某个段的区</li>
+<li>碎片区的页面可以分给不同的段</li>
+</ul>
+</li>
+<li>为某个段分配存储空间的策略如下<ol>
+<li>当表格数据不多时，从碎片区选择单个空页面来分配存储空间</li>
+<li>当某个段已经占用了32个碎片区页面后，就会以完整的区来分配存储空间（原先占用的碎片区页面并不会被复制到新申请的完整区之中）</li>
+</ol>
+</li>
+</ul>
+<h3 id="详细信息"><a href="#详细信息" class="headerlink" title="详细信息"></a>详细信息</h3><h4 id="区"><a href="#区" class="headerlink" title="区"></a>区</h4><ul>
+<li>空闲区<ul>
+<li>属于整个独立表空间</li>
+<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
+<li>链表的节点类型是XDES Entry，状态为FREE，Segment ID无效<img src="./image2.png" width="50%" height="50%" />
+其中的State就是前面提到的区的分类，可选的值分别是FREE(空闲区)、FREE_FRAG(有空闲页面的碎片区)、FULL_FRAG（没有空闲页面的碎片区）、FSEG（属于某个段的区）</li>
+<li>链表头节点的类型是List Base Node<img src="./image3.png" width="60%" height="60%" /></li>
+</ul>
+</li>
+<li>碎片区<ul>
+<li>属于整个独立表空间</li>
+<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
+<li>链表的节点类型是XDES Entry，状态为FREE_FRAG（有空闲页面的碎片区）或者FULL_FRAG（没有空闲页面的碎片区），Segment ID无效</li>
+<li>链表头节点的类型是List Base Node</li>
+</ul>
+</li>
+<li>属于段的区<ul>
+<li>属于某个段</li>
+<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
+<li>链表的节点类型是XDES Entry，Segment ID为对应段的ID</li>
+<li>链表头节点的类型是List Base Node</li>
+</ul>
+</li>
+</ul>
+<h4 id="段"><a href="#段" class="headerlink" title="段"></a>段</h4><ul>
+<li>段是一个逻辑上的概念，其物理上包括多个零散的页面和多个区，其中零散的页面属于碎片区。</li>
+<li>由于每个索引都有两个段，因此也需要设计相关的结构来存储相关信息。</li>
+<li>段的属性存储在INODE Entry中，INODE Entry也由链表连接起来，属于链表的节点<img src="./image4.png" width="60%" height="60%" />
+
+<blockquote>
+<p><strong>Segment ID</strong> - 每个段独有的编号<br><strong>NOT_FULL_N_USED</strong> - 在NOT_FULL链表中已经用了多少个页面<br><strong>List Node Base</strong> - 分别记录空链表、未满链表和满链表的头结点<br><strong>Magic Number</strong> - 标记该INODE Entry是否已经完整填入相关信息，是则初始化该字段为97937874<br><strong>Fragment Array Entry</strong> - 该段对应的零散页面的页号</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="页面"><a href="#页面" class="headerlink" title="页面"></a>页面</h4><ul>
+<li>前面提到，独立表空间分为多个组，每个组由256个区组成，每个区又由64个页面组成，即独立表空间可以分成多个组，每个组有256 × 64 &#x3D; 16384个页面。</li>
+<li>每个组的前几个页面是固定的。第一个组的前三个页面的页面类型分别是FSP_HDR、IBUF_BITMAP、INODE，其余组的前两个页面的页面类型分别是XDES、IBUF_BITMAP。</li>
+<li>FSP_HDR<img src="./image5.png" width="60%" height="60%" />
+* File Space Header存储整个独立表空间的属性
+
+<table>
+<thead>
+<tr>
+<th align="center">字段名称</th>
+<th align="center">占用空间(&#x2F;字节)</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Space ID</td>
+<td align="center">4</td>
+<td align="center">表空间的ID</td>
+</tr>
+<tr>
+<td align="center">Not Used</td>
+<td align="center">4</td>
+<td align="center">未使用，可忽略</td>
+</tr>
+<tr>
+<td align="center">Size</td>
+<td align="center">4</td>
+<td align="center">当前表空间拥有的页面数</td>
+</tr>
+<tr>
+<td align="center">Free Limit</td>
+<td align="center">4</td>
+<td align="center">未被初始化的最小页号，即大于或等于这个页号的页面的区对应的XDES Entry 结构没有被加入Free链表</td>
+</tr>
+<tr>
+<td align="center">Space Flags</td>
+<td align="center">4</td>
+<td align="center">表空间的一些占用存储空间比较小的属性</td>
+</tr>
+<tr>
+<td align="center">FRAG_N_USED</td>
+<td align="center">4</td>
+<td align="center">FREE_FRAG链表中已使用的页面数量</td>
+</tr>
+<tr>
+<td align="center">List Base Node for FREE list</td>
+<td align="center">16</td>
+<td align="center">FREE链表的头结点</td>
+</tr>
+<tr>
+<td align="center">List Base Node for FREE_FRAG list</td>
+<td align="center">16</td>
+<td align="center">FREE_FRAG链表的头结点</td>
+</tr>
+<tr>
+<td align="center">List Base Node for FULL_FRAG list</td>
+<td align="center">16</td>
+<td align="center">FULL_FRAG链表的头结点</td>
+</tr>
+<tr>
+<td align="center">Next Unused Segment ID</td>
+<td align="center">8</td>
+<td align="center">当前表空间中下一个未使用的Segment ID</td>
+</tr>
+<tr>
+<td align="center">List Base Node for SEG_INODES_FULL list</td>
+<td align="center">16</td>
+<td align="center">SEG_INODES_FULL链表的头结点</td>
+</tr>
+<tr>
+<td align="center">List Base Node for SEG_INODES_FREE list</td>
+<td align="center">16</td>
+<td align="center">SEG_INODES_FREE链表的头结点</td>
+</tr>
+</tbody></table>
+每个段对应的INODE Entry结构会集中存放到INODE页面中（即整个表空间的第三个页面），但如果索引很多，就会导致段很多，一个INODE页面无法完整存放所有数据，此时就会有多个INODE类型的页面来组成链表。SEG_INODES_FREE链表中的页面还有空间，SEG_INODES_FULL中的页面没有多余空间</li>
+<li>IBUF_BITMAP<ul>
+<li>记录了有关Change Buffer的相关信息</li>
+</ul>
+</li>
+<li>INODE<ul>
+<li>该类型的页面主要用于存储段的相关信息<img src="./image6.png" width="60%" height="60%" /></li>
+<li>当索引足够多时，就会导致段的数目过多，因此一个INODE页面无法存下所有的INODE Entry，需要多个INODE类型的页面来存储。此时就0号页面FSP_HDR中的SEG_INODES_FULL list和SEG_INODES_Free list相呼应</li>
+<li>存储INODE Entry的过程大致如下:每当新创建一个段<ol>
+<li>先从SEG_INODES_Free中查看是否为空，如果不空，则从中获取一个节点，相当于获取一个未写满的INODE页面，填充入新的段对应的INODE Entry。当这个页面填满后，就将其放入SEG_INODES_Full链表中</li>
+<li>如果SEG_INODES_Free链表为空，就需要从表空间的FREE_FRAG链表中申请一个新的页面，并将该页面类型修改为INODE，填入新的段对应的INODE Entry后，如果没有满，则将其放入SEG_INODES_Free中，否则放入SEG_INODES_Full中。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>XDES<ul>
+<li>与<strong>FSP_HDR</strong>页面几乎一样，只是FSP_HDR的File Space Header部分变为不进行使用</li>
+</ul>
+</li>
+</ul>
+<h2 id="系统表空间"><a href="#系统表空间" class="headerlink" title="系统表空间"></a>系统表空间</h2><ul>
+<li>整个MySQL进程只有一个系统表空间，需要记录整个系统的相关信息。</li>
+<li>系统表空间也分为若干个qu，每个区的前几个页面也是有固定的格式。</li>
+<li>关于系统表空间的内容本文不再详细描述。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E9%A1%B5/" rel="tag"># 数据页</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/09/07/AFL-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" rel="prev" title="AFL++的安装和基本使用">
+      <i class="fa fa-chevron-left"></i> AFL++的安装和基本使用
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#InnoDB%E7%9A%84%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.</span> <span class="nav-text">InnoDB的表空间</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">1.1.</span> <span class="nav-text">存储方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8B%AC%E7%AB%8B%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.</span> <span class="nav-text">独立表空间</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">1.2.1.</span> <span class="nav-text">基本信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.2.</span> <span class="nav-text">物理结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.3.</span> <span class="nav-text">逻辑结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E4%BF%A1%E6%81%AF"><span class="nav-number">1.2.4.</span> <span class="nav-text">详细信息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BA"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AE%B5"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B5%E9%9D%A2"><span class="nav-number">1.2.4.3.</span> <span class="nav-text">页面</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%A1%A8%E7%A9%BA%E9%97%B4"><span class="nav-number">1.3.</span> <span class="nav-text">系统表空间</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">lhl</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hourhl" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hourhl" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:huilin8200@gmail.com" title="E-Mail → mailto:huilin8200@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lhl</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">19k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">34 分钟</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
