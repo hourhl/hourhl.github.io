@@ -4,16 +4,39 @@
     <title>AFL++的安装和基本使用</title>
     <url>/2024/09/07/AFL-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h1 id="AFL"><a href="#AFL" class="headerlink" title="AFL++"></a>AFL++</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>AFL++是在AFL基础上进行改进的模糊测试工具，其<a href="https://github.com/AFLplusplus/AFLplusplus">源码</a>可以从github上得到。AFL++会将测试用例进行变异并作为输入交给目标程序，当这个测试用例能够触发新的路径时，就会被保存并进一步变异测试。</p>
-<h2 id="安装流程"><a href="#安装流程" class="headerlink" title="安装流程"></a>安装流程</h2><p>AFL++的安装可以通过docker安装，也可以通过源码安装，本实验通过源码安装</p>
-<h3 id="实验一"><a href="#实验一" class="headerlink" title="实验一"></a>实验一</h3><ul>
-<li>实验环境</li>
-<li>实验步骤</li>
-</ul>
-<h3 id="实验二"><a href="#实验二" class="headerlink" title="实验二"></a>实验二</h3><ul>
-<li>实验环境</li>
-<li>实验步骤</li>
-</ul>
-<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><h3 id="有源码"><a href="#有源码" class="headerlink" title="有源码"></a>有源码</h3><h3 id="无源码"><a href="#无源码" class="headerlink" title="无源码"></a>无源码</h3><h4 id="测试整个程序"><a href="#测试整个程序" class="headerlink" title="测试整个程序"></a>测试整个程序</h4><h4 id="测试某个函数"><a href="#测试某个函数" class="headerlink" title="测试某个函数"></a>测试某个函数</h4>]]></content>
+<h2 id="安装流程"><a href="#安装流程" class="headerlink" title="安装流程"></a>安装流程</h2><p>AFL++的安装可以通过docker安装，也可以通过源码安装，本实验通过源码安装<br>根据<a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/INSTALL.md">readme</a>进行安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">系统版本 Ubuntu20</span></span><br><span class="line"></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install -y build-essential python3-dev automake cmake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools cargo libgtk-3-dev</span><br><span class="line">sudo apt-get install -y lld-14 llvm-14 llvm-14-dev clang-14 || sudo apt-get install -y lld llvm llvm-dev clang</span><br><span class="line">sudo apt-get install -y gcc-$(gcc --version|head -n1|sed &#x27;s/\..*//&#x27;|sed &#x27;s/.* //&#x27;)-plugin-dev libstdc++-$(gcc --version|head -n1|sed &#x27;s/\..*//&#x27;|sed &#x27;s/.* //&#x27;)-dev</span><br><span class="line">sudo apt-get install -y ninja-build # for QEMU mode</span><br><span class="line">sudo apt-get install -y cpio libcapstone-dev # for Nyx mode</span><br><span class="line">sudo apt-get install -y wget curl # for Frida mode</span><br><span class="line">sudo apt-get install python3-pip # for Unicorn mode</span><br><span class="line">git clone https://github.com/AFLplusplus/AFLplusplus</span><br><span class="line">cd AFLplusplus</span><br><span class="line">make distrib</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>利用afl-training中的<a href="https://github.com/mykter/afl-training/tree/main/quickstart">vulnerable.c</a>来进行实验</p>
+<h3 id="有源码"><a href="#有源码" class="headerlink" title="有源码"></a>有源码</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">CC=afl-clang-fast AFL_HARDEN=1 make</span><br><span class="line">echo core | sudo tee /proc/sys/kernel/core_pattern</span><br><span class="line">afl-fuzz -i inputs -o out ./vulnerable</span><br></pre></td></tr></table></figure>
+<p>可以看到afl++能够成功运行这个目标程序，并且能够触发崩溃<br><img src="./image1.png" width="60%" height="60%" /></p>
+<h3 id="无源码"><a href="#无源码" class="headerlink" title="无源码"></a>无源码</h3><h4 id="测试整个程序"><a href="#测试整个程序" class="headerlink" title="测试整个程序"></a>测试整个程序</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -o vul vulnerable.c </span><br><span class="line">echo core | sudo tee /proc/sys/kernel/core_pattern</span><br><span class="line">afl-fuzz -Q -i inputs -o out ./vul</span><br></pre></td></tr></table></figure>
+<p>由于这个程序没有利用afl++编译插桩过，因此需要利用qemu模式，即运行afl++的时候需要加上参数-Q<br><img src="./image2.png" width="60%" height="60%" /></p>
+<h4 id="测试某个函数"><a href="#测试某个函数" class="headerlink" title="测试某个函数"></a>测试某个函数</h4><p><a href="https://github.com/mykter/afl-training/blob/main/quickstart/vulnerable.c">vulnerable.c</a></p>
+<p>假设要fuzz的目标函数是<strong>process</strong>，查阅AFL++的文档，了解到可以用AFL++的<a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/qemu_mode/README.persistent.md">persistent mode</a>。文档中提到，使用该模式需要确认目标函数的地址，并且编写<a href="https://github.com/AFLplusplus/AFLplusplus/tree/stable/utils/qemu_persistent_hook">persistent hook</a>来传入对应的参数。因此实验流程如下</p>
+<ol>
+<li>确认目标函数在程序中的偏移地址</li>
+</ol>
+  <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">确定process的地址</span></span><br><span class="line">nm vul | grep &quot;T process&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">值为00000000000012c9</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">AFL++在qemu模式的情况下进行fuzz的时候，如果程序启用了PIE,需要加上基地址0x4000000000</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以使用 checksec --file=vul 来确认是否启用了PIE</span></span><br><span class="line">export AFL_QEMU_PERSISTENT_ADDR=0x40000012c9</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>参照<a href="https://github.com/AFLplusplus/AFLplusplus/tree/stable/utils/qemu_persistent_hook">样例</a>编写persistent hook</li>
+</ol>
+  <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;/home/xu/lab-tools/git-lab/aflplusplus/AFLplusplus/qemu_mode/qemuafl/qemuafl/api.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> g2h(x) ((void *)((unsigned long)(x) + guest_base))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> h2g(x) ((uint64_t)(x) - guest_base)</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">afl_persistent_hook</span><span class="params">(<span class="keyword">struct</span> x86_64_regs *regs, <span class="type">uint64_t</span> guest_base,</span></span><br><span class="line"><span class="params">                       <span class="type">uint8_t</span> *input_buf, <span class="type">uint32_t</span> input_buf_len)</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// In this example the register RDI is pointing to the memory location</span></span><br><span class="line">  <span class="comment">// of the target buffer, and the length of the input is in RSI.</span></span><br><span class="line">  <span class="comment">// This can be seen with a debugger, e.g. gdb (and &quot;disass main&quot;)</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Placing input into 0x%lx\n&quot;</span>, regs-&gt;rdi);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;length of input_buf is %d\n&quot;</span>,input_buf_len);</span><br><span class="line">  <span class="built_in">memcpy</span>(g2h(regs-&gt;rdi), input_buf, input_buf_len);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> g2h</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> h2g</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">afl_persistent_hook_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 1 for shared memory input (faster), 0 for normal input (you have to use</span></span><br><span class="line">  <span class="comment">// read(), input_buf will be NULL)</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>运行AFL++来进行模糊测试</li>
+</ol>
+  <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -fPIC -shared read_into_rdi.c -o read_into_rdi.so</span><br><span class="line">export AFL_QEMU_PERSISTENT_HOOK=./read_into_rdi.so</span><br><span class="line">export AFL_QEMU_PERSISTENT_GPR=1</span><br><span class="line">export AFL_QEMU_PERSISTENT_MEM=1</span><br><span class="line">export AFL_QEMU_PERSISTENT_EXITS=1</span><br><span class="line"></span><br><span class="line">mkdir outputs</span><br><span class="line">export AFL_NO_FORKSRV=1</span><br><span class="line">AFL_DEBUG=1 afl-fuzz -Q -i inputs -o outputs ./vul</span><br></pre></td></tr></table></figure>
+
+<p>  可以看到afl++能够成功运行程序并且触发崩溃<br>  <img src="./image3.png" width="60%" height="60%" /></p>
+<blockquote>
+<p>由于无法从AFL++的界面中直观地看出是否进入persistent mode，因此可以通过在vulnerable.c中添加一些输入来确定是否达到我们的预期，比如在main函数中添加<code>printf(&quot;function : main\n&quot;)</code>，在process函数中添加<code>printf(&quot;function : process\n&quot;)</code>，然后在运行afl++的指令前加上<code>AFL_DEBUG=1</code>，如果看到main的输出只有一次，process函数反复输出，说明程序的运行达到了我们的预期。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>模糊测试</category>
+      </categories>
       <tags>
         <tag>模糊测试</tag>
         <tag>AFL++</tag>
@@ -802,6 +825,88 @@
       </tags>
   </entry>
   <entry>
+    <title>搭建个人博客(Hexo + Github)</title>
+    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
+<span id="more"></span>
+
+<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
+<li>安装node.js</li>
+<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>安装博客网站的框架Hexo<ul>
+<li>在Github新建一个仓库</li>
+<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
+<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
+<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
+<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
+本地部署完成</li>
+</ul>
+</li>
+<li>将Hexo部署到Github<ul>
+<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
+<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
+<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
+部署成功</li>
+</ul>
+</li>
+<li>绑定域名<ul>
+<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
+<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
+<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
+<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
+<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
+<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
+<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
+</ul>
+</li>
+</ul>
+<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
+<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
+<li>以Cactus主题为例<ul>
+<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
+<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
+<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
+<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
+<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
+<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>experience</category>
+      </categories>
+      <tags>
+        <tag>blog</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>《MySQL是怎样运行的》（四）</title>
     <url>/2024/09/06/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E5%9B%9B%EF%BC%89/</url>
     <content><![CDATA[<h1 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h1><h2 id="单表查询"><a href="#单表查询" class="headerlink" title="单表查询"></a>单表查询</h2><h3 id="访问方法"><a href="#访问方法" class="headerlink" title="访问方法"></a>访问方法</h3><ol>
@@ -900,88 +1005,6 @@
         <tag>MySQL</tag>
         <tag>数据库</tag>
         <tag>查询</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>搭建个人博客(Hexo + Github)</title>
-    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
-<span id="more"></span>
-
-<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
-<li>安装node.js</li>
-<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
-<li>安装博客网站的框架Hexo<ul>
-<li>在Github新建一个仓库</li>
-<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
-<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
-<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
-<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
-<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
-本地部署完成</li>
-</ul>
-</li>
-<li>将Hexo部署到Github<ul>
-<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
-<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
-<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
-<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
-部署成功</li>
-</ul>
-</li>
-<li>绑定域名<ul>
-<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
-<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
-<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
-<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
-<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
-<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
-<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
-<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
-</ul>
-</li>
-</ul>
-<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
-<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
-<li>以Cactus主题为例<ul>
-<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
-<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
-<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
-<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
-<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
-<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
-<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>experience</category>
-      </categories>
-      <tags>
-        <tag>blog</tag>
-        <tag>Hexo</tag>
       </tags>
   </entry>
   <entry>
