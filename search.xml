@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Gnutls源码安装小记</title>
+    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
+<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>nettlex.so not found</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
+<li><p><code>libev4 was not found.</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <categories>
+        <category>experience</category>
+      </categories>
+      <tags>
+        <tag>Gnutls</tag>
+        <tag>SSL</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>AFL++的安装和基本使用</title>
     <url>/2024/09/07/AFL-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h1 id="AFL"><a href="#AFL" class="headerlink" title="AFL++"></a>AFL++</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>AFL++是在AFL基础上进行改进的模糊测试工具，其<a href="https://github.com/AFLplusplus/AFLplusplus">源码</a>可以从github上得到。AFL++会将测试用例进行变异并作为输入交给目标程序，当这个测试用例能够触发新的路径时，就会被保存并进一步变异测试。</p>
@@ -40,36 +70,6 @@
       <tags>
         <tag>模糊测试</tag>
         <tag>AFL++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Gnutls源码安装小记</title>
-    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-
-<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
-<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>nettlex.so not found</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
-<li><p><code>libev4 was not found.</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
-</ol>
-]]></content>
-      <categories>
-        <category>experience</category>
-      </categories>
-      <tags>
-        <tag>Gnutls</tag>
-        <tag>SSL</tag>
       </tags>
   </entry>
   <entry>
@@ -151,7 +151,7 @@
 <!-- ![image-20240820165401813](E:\lab\IPsec.assets\image-20240820165401813.png) -->
 <img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image7.png" class="" title="image7">]]></content>
       <categories>
-        <category>experience</category>
+        <category>Strongswan</category>
       </categories>
       <tags>
         <tag>Strongswan</tag>
@@ -236,7 +236,7 @@
 </ul>
 ]]></content>
       <categories>
-        <category>reading</category>
+        <category>MySQL</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -295,7 +295,7 @@
 </ul>
 ]]></content>
       <categories>
-        <category>reading</category>
+        <category>MySQL</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -642,7 +642,7 @@
 </ul>
 ]]></content>
       <categories>
-        <category>reading</category>
+        <category>MySQL</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -817,89 +817,37 @@
 </ul>
 ]]></content>
       <categories>
-        <category>reading</category>
+        <category>MySQL</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
+        <tag>数据库</tag>
         <tag>数据页</tag>
       </tags>
   </entry>
   <entry>
-    <title>搭建个人博客(Hexo + Github)</title>
-    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
-<span id="more"></span>
-
-<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
-<li>安装node.js</li>
-<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
-<li>安装博客网站的框架Hexo<ul>
-<li>在Github新建一个仓库</li>
-<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
-<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
-<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
-<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
-<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
-本地部署完成</li>
+    <title>撰写博客(Hexo + Github)</title>
+    <url>/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="新建md文件"><a href="#新建md文件" class="headerlink" title="新建md文件"></a>新建md文件</h1><ul>
+<li><code>hexo n filename</code> – 在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>参照<a href="https://markdown.com.cn/basic-syntax/">Markdown 官方教程</a>编写文章内容<span id="more"></span></li>
 </ul>
-</li>
-<li>将Hexo部署到Github<ul>
-<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
-<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
-<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
-<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
-部署成功</li>
+<h1 id="新建草稿"><a href="#新建草稿" class="headerlink" title="新建草稿"></a>新建草稿</h1><ul>
+<li><code>hexo n draft filename</code> – 在&#x2F;source&#x2F;_drafts文件夹下生成一个filename.md</li>
+<li><code>hexo publish filename</code> – 发布文章，将md文件移动到&#x2F;source&#x2F;_posts下</li>
 </ul>
-</li>
-<li>绑定域名<ul>
-<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
-<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
-<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
-<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
-<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
-<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
-<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
-<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
-</ul>
-</li>
-</ul>
-<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
-<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
-<li>以Cactus主题为例<ul>
-<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
-<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
-<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
-<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
-<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
-<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
-<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
+<h1 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h1><ul>
+<li>为了实现结构化管理每篇博客的图像，将_config.yml中的post_asset_folder设置为true，并加入以下内容<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
+<li>配置文件修改完成后，每次运行<code>hexo n filename</code>都会在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md和一个&#x2F;filename文件夹</li>
+<li>插入图片<ul>
+<li>将需要加载的图片放入到与当前博客同名的文件夹下</li>
+<li>在需要插入图片的位置插入以下代码 <code>&#123;% asset_img 随便什么名.png 想要插入的图片名 %&#125;</code>，即可在网页上加载出来</li>
 </ul>
 </li>
 </ul>
 ]]></content>
       <categories>
-        <category>experience</category>
+        <category>博客</category>
       </categories>
       <tags>
         <tag>blog</tag>
@@ -999,7 +947,7 @@
 </ul>
 ]]></content>
       <categories>
-        <category>reading</category>
+        <category>MySQL</category>
       </categories>
       <tags>
         <tag>MySQL</tag>
@@ -1008,28 +956,81 @@
       </tags>
   </entry>
   <entry>
-    <title>撰写博客(Hexo + Github)</title>
-    <url>/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="新建md文件"><a href="#新建md文件" class="headerlink" title="新建md文件"></a>新建md文件</h1><ul>
-<li><code>hexo n filename</code> – 在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
-<li>参照<a href="https://markdown.com.cn/basic-syntax/">Markdown 官方教程</a>编写文章内容<span id="more"></span></li>
+    <title>搭建个人博客(Hexo + Github)</title>
+    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
+<span id="more"></span>
+
+<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
+<li>安装node.js</li>
+<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>安装博客网站的框架Hexo<ul>
+<li>在Github新建一个仓库</li>
+<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
+<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
+<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
+<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
+本地部署完成</li>
 </ul>
-<h1 id="新建草稿"><a href="#新建草稿" class="headerlink" title="新建草稿"></a>新建草稿</h1><ul>
-<li><code>hexo n draft filename</code> – 在&#x2F;source&#x2F;_drafts文件夹下生成一个filename.md</li>
-<li><code>hexo publish filename</code> – 发布文章，将md文件移动到&#x2F;source&#x2F;_posts下</li>
+</li>
+<li>将Hexo部署到Github<ul>
+<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
+<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
+<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
+部署成功</li>
 </ul>
-<h1 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h1><ul>
-<li>为了实现结构化管理每篇博客的图像，将_config.yml中的post_asset_folder设置为true，并加入以下内容<img src="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
-<li>配置文件修改完成后，每次运行<code>hexo n filename</code>都会在&#x2F;source&#x2F;_posts文件夹下生成一个filename.md和一个&#x2F;filename文件夹</li>
-<li>插入图片<ul>
-<li>将需要加载的图片放入到与当前博客同名的文件夹下</li>
-<li>在需要插入图片的位置插入以下代码 <code>&#123;% asset_img 随便什么名.png 想要插入的图片名 %&#125;</code>，即可在网页上加载出来</li>
+</li>
+<li>绑定域名<ul>
+<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
+<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
+<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
+<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
+<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
+<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
+<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
+</ul>
+</li>
+</ul>
+<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
+<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
+<li>以Cactus主题为例<ul>
+<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
+<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
+<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
+<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
+<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
+<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
 </ul>
 </li>
 </ul>
 ]]></content>
       <categories>
-        <category>experience</category>
+        <category>博客</category>
       </categories>
       <tags>
         <tag>blog</tag>
