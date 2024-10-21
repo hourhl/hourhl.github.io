@@ -1,6 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>AFL++的安装和基本使用</title>
+    <url>/2024/09/07/AFL-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h1 id="AFL"><a href="#AFL" class="headerlink" title="AFL++"></a>AFL++</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>AFL++是在AFL基础上进行改进的模糊测试工具，其<a href="https://github.com/AFLplusplus/AFLplusplus">源码</a>可以从github上得到。AFL++会将测试用例进行变异并作为输入交给目标程序，当这个测试用例能够触发新的路径时，就会被保存并进一步变异测试。</p>
+<h2 id="安装流程"><a href="#安装流程" class="headerlink" title="安装流程"></a>安装流程</h2><p>AFL++的安装可以通过docker安装，也可以通过源码安装，本实验通过源码安装<br>根据<a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/INSTALL.md">readme</a>进行安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">系统版本 Ubuntu20</span></span><br><span class="line"></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install -y build-essential python3-dev automake cmake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools cargo libgtk-3-dev</span><br><span class="line">sudo apt-get install -y lld-14 llvm-14 llvm-14-dev clang-14 || sudo apt-get install -y lld llvm llvm-dev clang</span><br><span class="line">sudo apt-get install -y gcc-$(gcc --version|head -n1|sed &#x27;s/\..*//&#x27;|sed &#x27;s/.* //&#x27;)-plugin-dev libstdc++-$(gcc --version|head -n1|sed &#x27;s/\..*//&#x27;|sed &#x27;s/.* //&#x27;)-dev</span><br><span class="line">sudo apt-get install -y ninja-build # for QEMU mode</span><br><span class="line">sudo apt-get install -y cpio libcapstone-dev # for Nyx mode</span><br><span class="line">sudo apt-get install -y wget curl # for Frida mode</span><br><span class="line">sudo apt-get install python3-pip # for Unicorn mode</span><br><span class="line">git clone https://github.com/AFLplusplus/AFLplusplus</span><br><span class="line">cd AFLplusplus</span><br><span class="line">make distrib</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>利用afl-training中的<a href="https://github.com/mykter/afl-training/tree/main/quickstart">vulnerable.c</a>来进行实验</p>
+<h3 id="有源码"><a href="#有源码" class="headerlink" title="有源码"></a>有源码</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">CC=afl-clang-fast AFL_HARDEN=1 make</span><br><span class="line">echo core | sudo tee /proc/sys/kernel/core_pattern</span><br><span class="line">afl-fuzz -i inputs -o out ./vulnerable</span><br></pre></td></tr></table></figure>
+<p>可以看到afl++能够成功运行这个目标程序，并且能够触发崩溃<br><img src="./image1.png" width="60%" height="60%" /></p>
+<h3 id="无源码"><a href="#无源码" class="headerlink" title="无源码"></a>无源码</h3><h4 id="测试整个程序"><a href="#测试整个程序" class="headerlink" title="测试整个程序"></a>测试整个程序</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -o vul vulnerable.c </span><br><span class="line">echo core | sudo tee /proc/sys/kernel/core_pattern</span><br><span class="line">afl-fuzz -Q -i inputs -o out ./vul</span><br></pre></td></tr></table></figure>
+<p>由于这个程序没有利用afl++编译插桩过，因此需要利用qemu模式，即运行afl++的时候需要加上参数-Q<br><img src="./image2.png" width="60%" height="60%" /></p>
+<h4 id="测试某个函数"><a href="#测试某个函数" class="headerlink" title="测试某个函数"></a>测试某个函数</h4><p><a href="https://github.com/mykter/afl-training/blob/main/quickstart/vulnerable.c">vulnerable.c</a></p>
+<p>假设要fuzz的目标函数是<strong>process</strong>，查阅AFL++的文档，了解到可以用AFL++的<a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/qemu_mode/README.persistent.md">persistent mode</a>。文档中提到，使用该模式需要确认目标函数的地址，并且编写<a href="https://github.com/AFLplusplus/AFLplusplus/tree/stable/utils/qemu_persistent_hook">persistent hook</a>来传入对应的参数。因此实验流程如下</p>
+<ol>
+<li>确认目标函数在程序中的偏移地址</li>
+</ol>
+  <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">确定process的地址</span></span><br><span class="line">nm vul | grep &quot;T process&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">值为00000000000012c9</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">AFL++在qemu模式的情况下进行fuzz的时候，如果程序启用了PIE,需要加上基地址0x4000000000</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以使用 checksec --file=vul 来确认是否启用了PIE</span></span><br><span class="line">export AFL_QEMU_PERSISTENT_ADDR=0x40000012c9</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>参照<a href="https://github.com/AFLplusplus/AFLplusplus/tree/stable/utils/qemu_persistent_hook">样例</a>编写persistent hook</li>
+</ol>
+  <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;/home/xu/lab-tools/git-lab/aflplusplus/AFLplusplus/qemu_mode/qemuafl/qemuafl/api.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> g2h(x) ((void *)((unsigned long)(x) + guest_base))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> h2g(x) ((uint64_t)(x) - guest_base)</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">afl_persistent_hook</span><span class="params">(<span class="keyword">struct</span> x86_64_regs *regs, <span class="type">uint64_t</span> guest_base,</span></span><br><span class="line"><span class="params">                       <span class="type">uint8_t</span> *input_buf, <span class="type">uint32_t</span> input_buf_len)</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// In this example the register RDI is pointing to the memory location</span></span><br><span class="line">  <span class="comment">// of the target buffer, and the length of the input is in RSI.</span></span><br><span class="line">  <span class="comment">// This can be seen with a debugger, e.g. gdb (and &quot;disass main&quot;)</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Placing input into 0x%lx\n&quot;</span>, regs-&gt;rdi);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;length of input_buf is %d\n&quot;</span>,input_buf_len);</span><br><span class="line">  <span class="built_in">memcpy</span>(g2h(regs-&gt;rdi), input_buf, input_buf_len);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> g2h</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> h2g</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">afl_persistent_hook_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 1 for shared memory input (faster), 0 for normal input (you have to use</span></span><br><span class="line">  <span class="comment">// read(), input_buf will be NULL)</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>运行AFL++来进行模糊测试</li>
+</ol>
+  <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -fPIC -shared read_into_rdi.c -o read_into_rdi.so</span><br><span class="line">export AFL_QEMU_PERSISTENT_HOOK=./read_into_rdi.so</span><br><span class="line">export AFL_QEMU_PERSISTENT_GPR=1</span><br><span class="line">export AFL_QEMU_PERSISTENT_MEM=1</span><br><span class="line">export AFL_QEMU_PERSISTENT_EXITS=1</span><br><span class="line"></span><br><span class="line">mkdir outputs</span><br><span class="line">export AFL_NO_FORKSRV=1</span><br><span class="line">AFL_DEBUG=1 afl-fuzz -Q -i inputs -o outputs ./vul</span><br></pre></td></tr></table></figure>
+
+<p>  可以看到afl++能够成功运行程序并且触发崩溃<br>  <img src="./image3.png" width="60%" height="60%" /></p>
+<blockquote>
+<p>由于无法从AFL++的界面中直观地看出是否进入persistent mode，因此可以通过在vulnerable.c中添加一些输入来确定是否达到我们的预期，比如在main函数中添加<code>printf(&quot;function : main\n&quot;)</code>，在process函数中添加<code>printf(&quot;function : process\n&quot;)</code>，然后在运行afl++的指令前加上<code>AFL_DEBUG=1</code>，如果看到main的输出只有一次，process函数反复输出，说明程序的运行达到了我们的预期。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>实验记录</category>
+      </categories>
+      <tags>
+        <tag>模糊测试</tag>
+        <tag>AFL++</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>StrongSwan部署小记</title>
     <url>/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/</url>
     <content><![CDATA[<h1 id="虚拟机搭建strongswan"><a href="#虚拟机搭建strongswan" class="headerlink" title="虚拟机搭建strongswan"></a>虚拟机搭建strongswan</h1><p>注：仅作测试用，故服务端和客户端分别安装在了同一网段下的两台Ubuntu上。</p>
@@ -79,12 +121,108 @@
 <!-- ![image-20240820165401813](E:\lab\IPsec.assets\image-20240820165401813.png) -->
 <img src="/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/image7.png" class="" title="image7">]]></content>
       <categories>
-        <category>Strongswan</category>
+        <category>实验记录</category>
       </categories>
       <tags>
         <tag>Strongswan</tag>
         <tag>IPsec</tag>
         <tag>VPN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Gnutls源码安装小记</title>
+    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
+<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>nettlex.so not found</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
+<li><p><code>libev4 was not found.</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <categories>
+        <category>实验记录</category>
+      </categories>
+      <tags>
+        <tag>Gnutls</tag>
+        <tag>SSL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Welcome</title>
+    <url>/2024/05/23/Welcome/</url>
+    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
+]]></content>
+  </entry>
+  <entry>
+    <title>《MySQL是怎样运行的》（三）</title>
+    <url>/2024/08/14/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%B8%89%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li><p>常用的数据结构 - B+树</p>
+<ol>
+<li>高度平衡：所有叶子节点处于同一层</li>
+<li>叶子节点存储索引列和主键值（或索引列和完整数据记录），由双向链表构成</li>
+<li>除了叶子节点外，每个节点可以有多个子节点</li>
+</ol>
+</li>
+<li><p>常见的索引类型</p>
+<ul>
+<li>按叶子节点存放的数据分类：聚簇索引（叶子节点存放完整的数据记录，通常主键作为排序条件）和二级索引（需要回表查询完整的数据记录，通常非主键列作为排序条件）</li>
+<li>覆盖索引：需要查询的内容包含在索引列中</li>
+<li>联合索引：也称复合索引、组合索引，该类型的索引包含了多个数据列，本质也是一个二级索引</li>
+</ul>
+</li>
+<li><p>MyISAM引擎的细节和上述（InnoDB引擎）不完全一样。其将索引和数据分开存储。</p>
+<blockquote>
+<p>所有数据都存放在数据文件中，索引树存放对应的行号，根据行号查找对应的数据记录</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="索引的构建及使用"><a href="#索引的构建及使用" class="headerlink" title="索引的构建及使用"></a>索引的构建及使用</h2><ul>
+<li>InnoDB默认为主键构建一个聚簇索引，叶子节点包含完整的数据记录</li>
+<li>用户可以为非主键构建二级索引，该B+树的非叶子节点存放索引列的值、主键值以及对应下一层索引页的页号，叶子节点存放索引列的值和主键值，需要根据主键值再去聚簇索引查找完整的数据记录，因此被称为二级索引</li>
+<li>索引在逻辑层面上是B+树，在物理层面上是以页的形式存放，每一页都是同一层的节点，且页与页之间有双向指针相连。页内按照索引列的值大小排成单向链表。</li>
+<li>索引页的布局与数据页类似，每一页都分成七个部分，其中数据部分分成若干组，每组中主键大的记录的偏移量会被存储在页目录中的槽中。</li>
+<li>进行检索时，每条索引指向与其值相等的第一条记录所在的位置。</li>
+</ul>
+<h2 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h2><h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ol>
+<li>提高查找效率</li>
+<li>如果查找的结果需要按照索引条件分组或者排列，也能减少时间开支</li>
+</ol>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ol>
+<li>维护索引需要额外的时间，比如插入数据导致的页面分裂，删除数据导致的索引重新排列等。</li>
+<li>使用索引也需要时间。每次执行查询语句之前，都需要计算不同的索引所需的时间成本，生成一个执行计划。如果索引过多，就有可能导致这个生成执行计划的时间过长。</li>
+<li>建立索引需要占用额外的空间。每创建一个索引就是构建一个新的二叉树，二叉树的节点需要占据空间。</li>
+</ol>
+<h2 id="如何创建合适的索引"><a href="#如何创建合适的索引" class="headerlink" title="如何创建合适的索引"></a>如何创建合适的索引</h2><ul>
+<li><code>为常用作搜索条件的列创建索引</code>  为常出现在WHERE、ORDER BY、GROUP BY子句中的列创建索引，仅出现在查询列表中的列就不必要创建索引</li>
+<li><code>不为含有太多重复值的列创建索引</code>  如果某列中重复的数值很多，该列就不适合作为快速搜索的条件，因此不必要创建索引</li>
+<li><code>索引列的数据类型占用空间尽可能小</code>  为某列创建索引，索引树的节点中就都存放有该列的值，如果值的类型占用的存储空间太大，就会产生不必要的空间消耗。例如使用INT类型就足够表示，就不必要使用BIGINT类型。</li>
+<li><code>为列前缀创建索引</code>  可以将字符串中的前几个字符存放到索引中。</li>
+<li><code>创建覆盖索引</code>  常出现在查询列表中的列可以创建覆盖索引，这样B+树中的叶子节点就有需要的结果，不需要回表查询，减少时间开销。</li>
+<li><code>不要在搜索条件中进行索引列的运算</code>  例如以key列创建了索引，如果WHERE子句中的搜索条件是WHERE key * 2 &lt; 4，那么MySQL将使用全表扫描而不使用索引。</li>
+<li><code>表的主键设置为自动递增</code>  MySQL默认为表格的主键列创建聚簇索引，如果主键不是递增的，那么插入新记录时就有可能导致正好插入到已满的数据页的中间，此时MySQL需要进行页面分裂，并把一些数据移动到新的页面中，造成无谓的性能损耗。</li>
+<li><code>不要创建冗余和重复索引</code>  例如本身已经创建了一个针对key1\key2的联合索引，就不需要单独再为key1创建索引了</li>
+</ul>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+        <tag>索引</tag>
       </tags>
   </entry>
   <entry>
@@ -163,435 +301,6 @@
       <tags>
         <tag>MySQL</tag>
         <tag>数据库</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>AFL++的安装和基本使用</title>
-    <url>/2024/09/07/AFL-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h1 id="AFL"><a href="#AFL" class="headerlink" title="AFL++"></a>AFL++</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>AFL++是在AFL基础上进行改进的模糊测试工具，其<a href="https://github.com/AFLplusplus/AFLplusplus">源码</a>可以从github上得到。AFL++会将测试用例进行变异并作为输入交给目标程序，当这个测试用例能够触发新的路径时，就会被保存并进一步变异测试。</p>
-<h2 id="安装流程"><a href="#安装流程" class="headerlink" title="安装流程"></a>安装流程</h2><p>AFL++的安装可以通过docker安装，也可以通过源码安装，本实验通过源码安装<br>根据<a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/docs/INSTALL.md">readme</a>进行安装</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">系统版本 Ubuntu20</span></span><br><span class="line"></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install -y build-essential python3-dev automake cmake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools cargo libgtk-3-dev</span><br><span class="line">sudo apt-get install -y lld-14 llvm-14 llvm-14-dev clang-14 || sudo apt-get install -y lld llvm llvm-dev clang</span><br><span class="line">sudo apt-get install -y gcc-$(gcc --version|head -n1|sed &#x27;s/\..*//&#x27;|sed &#x27;s/.* //&#x27;)-plugin-dev libstdc++-$(gcc --version|head -n1|sed &#x27;s/\..*//&#x27;|sed &#x27;s/.* //&#x27;)-dev</span><br><span class="line">sudo apt-get install -y ninja-build # for QEMU mode</span><br><span class="line">sudo apt-get install -y cpio libcapstone-dev # for Nyx mode</span><br><span class="line">sudo apt-get install -y wget curl # for Frida mode</span><br><span class="line">sudo apt-get install python3-pip # for Unicorn mode</span><br><span class="line">git clone https://github.com/AFLplusplus/AFLplusplus</span><br><span class="line">cd AFLplusplus</span><br><span class="line">make distrib</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-
-<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>利用afl-training中的<a href="https://github.com/mykter/afl-training/tree/main/quickstart">vulnerable.c</a>来进行实验</p>
-<h3 id="有源码"><a href="#有源码" class="headerlink" title="有源码"></a>有源码</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">CC=afl-clang-fast AFL_HARDEN=1 make</span><br><span class="line">echo core | sudo tee /proc/sys/kernel/core_pattern</span><br><span class="line">afl-fuzz -i inputs -o out ./vulnerable</span><br></pre></td></tr></table></figure>
-<p>可以看到afl++能够成功运行这个目标程序，并且能够触发崩溃<br><img src="./image1.png" width="60%" height="60%" /></p>
-<h3 id="无源码"><a href="#无源码" class="headerlink" title="无源码"></a>无源码</h3><h4 id="测试整个程序"><a href="#测试整个程序" class="headerlink" title="测试整个程序"></a>测试整个程序</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -o vul vulnerable.c </span><br><span class="line">echo core | sudo tee /proc/sys/kernel/core_pattern</span><br><span class="line">afl-fuzz -Q -i inputs -o out ./vul</span><br></pre></td></tr></table></figure>
-<p>由于这个程序没有利用afl++编译插桩过，因此需要利用qemu模式，即运行afl++的时候需要加上参数-Q<br><img src="./image2.png" width="60%" height="60%" /></p>
-<h4 id="测试某个函数"><a href="#测试某个函数" class="headerlink" title="测试某个函数"></a>测试某个函数</h4><p><a href="https://github.com/mykter/afl-training/blob/main/quickstart/vulnerable.c">vulnerable.c</a></p>
-<p>假设要fuzz的目标函数是<strong>process</strong>，查阅AFL++的文档，了解到可以用AFL++的<a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/qemu_mode/README.persistent.md">persistent mode</a>。文档中提到，使用该模式需要确认目标函数的地址，并且编写<a href="https://github.com/AFLplusplus/AFLplusplus/tree/stable/utils/qemu_persistent_hook">persistent hook</a>来传入对应的参数。因此实验流程如下</p>
-<ol>
-<li>确认目标函数在程序中的偏移地址</li>
-</ol>
-  <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">确定process的地址</span></span><br><span class="line">nm vul | grep &quot;T process&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">值为00000000000012c9</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">AFL++在qemu模式的情况下进行fuzz的时候，如果程序启用了PIE,需要加上基地址0x4000000000</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以使用 checksec --file=vul 来确认是否启用了PIE</span></span><br><span class="line">export AFL_QEMU_PERSISTENT_ADDR=0x40000012c9</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>参照<a href="https://github.com/AFLplusplus/AFLplusplus/tree/stable/utils/qemu_persistent_hook">样例</a>编写persistent hook</li>
-</ol>
-  <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;/home/xu/lab-tools/git-lab/aflplusplus/AFLplusplus/qemu_mode/qemuafl/qemuafl/api.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> g2h(x) ((void *)((unsigned long)(x) + guest_base))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> h2g(x) ((uint64_t)(x) - guest_base)</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">afl_persistent_hook</span><span class="params">(<span class="keyword">struct</span> x86_64_regs *regs, <span class="type">uint64_t</span> guest_base,</span></span><br><span class="line"><span class="params">                       <span class="type">uint8_t</span> *input_buf, <span class="type">uint32_t</span> input_buf_len)</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// In this example the register RDI is pointing to the memory location</span></span><br><span class="line">  <span class="comment">// of the target buffer, and the length of the input is in RSI.</span></span><br><span class="line">  <span class="comment">// This can be seen with a debugger, e.g. gdb (and &quot;disass main&quot;)</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Placing input into 0x%lx\n&quot;</span>, regs-&gt;rdi);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;length of input_buf is %d\n&quot;</span>,input_buf_len);</span><br><span class="line">  <span class="built_in">memcpy</span>(g2h(regs-&gt;rdi), input_buf, input_buf_len);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> g2h</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> h2g</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">afl_persistent_hook_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 1 for shared memory input (faster), 0 for normal input (you have to use</span></span><br><span class="line">  <span class="comment">// read(), input_buf will be NULL)</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>运行AFL++来进行模糊测试</li>
-</ol>
-  <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">gcc -fPIC -shared read_into_rdi.c -o read_into_rdi.so</span><br><span class="line">export AFL_QEMU_PERSISTENT_HOOK=./read_into_rdi.so</span><br><span class="line">export AFL_QEMU_PERSISTENT_GPR=1</span><br><span class="line">export AFL_QEMU_PERSISTENT_MEM=1</span><br><span class="line">export AFL_QEMU_PERSISTENT_EXITS=1</span><br><span class="line"></span><br><span class="line">mkdir outputs</span><br><span class="line">export AFL_NO_FORKSRV=1</span><br><span class="line">AFL_DEBUG=1 afl-fuzz -Q -i inputs -o outputs ./vul</span><br></pre></td></tr></table></figure>
-
-<p>  可以看到afl++能够成功运行程序并且触发崩溃<br>  <img src="./image3.png" width="60%" height="60%" /></p>
-<blockquote>
-<p>由于无法从AFL++的界面中直观地看出是否进入persistent mode，因此可以通过在vulnerable.c中添加一些输入来确定是否达到我们的预期，比如在main函数中添加<code>printf(&quot;function : main\n&quot;)</code>，在process函数中添加<code>printf(&quot;function : process\n&quot;)</code>，然后在运行afl++的指令前加上<code>AFL_DEBUG=1</code>，如果看到main的输出只有一次，process函数反复输出，说明程序的运行达到了我们的预期。</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>模糊测试</category>
-      </categories>
-      <tags>
-        <tag>模糊测试</tag>
-        <tag>AFL++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Gnutls源码安装小记</title>
-    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-
-<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
-<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>nettlex.so not found</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
-<li><p><code>libev4 was not found.</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
-</ol>
-]]></content>
-      <categories>
-        <category>gnutls</category>
-      </categories>
-      <tags>
-        <tag>Gnutls</tag>
-        <tag>SSL</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>《MySQL是怎样运行的》（三）</title>
-    <url>/2024/08/14/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%B8%89%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
-<li><p>常用的数据结构 - B+树</p>
-<ol>
-<li>高度平衡：所有叶子节点处于同一层</li>
-<li>叶子节点存储索引列和主键值（或索引列和完整数据记录），由双向链表构成</li>
-<li>除了叶子节点外，每个节点可以有多个子节点</li>
-</ol>
-</li>
-<li><p>常见的索引类型</p>
-<ul>
-<li>按叶子节点存放的数据分类：聚簇索引（叶子节点存放完整的数据记录，通常主键作为排序条件）和二级索引（需要回表查询完整的数据记录，通常非主键列作为排序条件）</li>
-<li>覆盖索引：需要查询的内容包含在索引列中</li>
-<li>联合索引：也称复合索引、组合索引，该类型的索引包含了多个数据列，本质也是一个二级索引</li>
-</ul>
-</li>
-<li><p>MyISAM引擎的细节和上述（InnoDB引擎）不完全一样。其将索引和数据分开存储。</p>
-<blockquote>
-<p>所有数据都存放在数据文件中，索引树存放对应的行号，根据行号查找对应的数据记录</p>
-</blockquote>
-</li>
-</ul>
-<h2 id="索引的构建及使用"><a href="#索引的构建及使用" class="headerlink" title="索引的构建及使用"></a>索引的构建及使用</h2><ul>
-<li>InnoDB默认为主键构建一个聚簇索引，叶子节点包含完整的数据记录</li>
-<li>用户可以为非主键构建二级索引，该B+树的非叶子节点存放索引列的值、主键值以及对应下一层索引页的页号，叶子节点存放索引列的值和主键值，需要根据主键值再去聚簇索引查找完整的数据记录，因此被称为二级索引</li>
-<li>索引在逻辑层面上是B+树，在物理层面上是以页的形式存放，每一页都是同一层的节点，且页与页之间有双向指针相连。页内按照索引列的值大小排成单向链表。</li>
-<li>索引页的布局与数据页类似，每一页都分成七个部分，其中数据部分分成若干组，每组中主键大的记录的偏移量会被存储在页目录中的槽中。</li>
-<li>进行检索时，每条索引指向与其值相等的第一条记录所在的位置。</li>
-</ul>
-<h2 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h2><h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ol>
-<li>提高查找效率</li>
-<li>如果查找的结果需要按照索引条件分组或者排列，也能减少时间开支</li>
-</ol>
-<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ol>
-<li>维护索引需要额外的时间，比如插入数据导致的页面分裂，删除数据导致的索引重新排列等。</li>
-<li>使用索引也需要时间。每次执行查询语句之前，都需要计算不同的索引所需的时间成本，生成一个执行计划。如果索引过多，就有可能导致这个生成执行计划的时间过长。</li>
-<li>建立索引需要占用额外的空间。每创建一个索引就是构建一个新的二叉树，二叉树的节点需要占据空间。</li>
-</ol>
-<h2 id="如何创建合适的索引"><a href="#如何创建合适的索引" class="headerlink" title="如何创建合适的索引"></a>如何创建合适的索引</h2><ul>
-<li><code>为常用作搜索条件的列创建索引</code>  为常出现在WHERE、ORDER BY、GROUP BY子句中的列创建索引，仅出现在查询列表中的列就不必要创建索引</li>
-<li><code>不为含有太多重复值的列创建索引</code>  如果某列中重复的数值很多，该列就不适合作为快速搜索的条件，因此不必要创建索引</li>
-<li><code>索引列的数据类型占用空间尽可能小</code>  为某列创建索引，索引树的节点中就都存放有该列的值，如果值的类型占用的存储空间太大，就会产生不必要的空间消耗。例如使用INT类型就足够表示，就不必要使用BIGINT类型。</li>
-<li><code>为列前缀创建索引</code>  可以将字符串中的前几个字符存放到索引中。</li>
-<li><code>创建覆盖索引</code>  常出现在查询列表中的列可以创建覆盖索引，这样B+树中的叶子节点就有需要的结果，不需要回表查询，减少时间开销。</li>
-<li><code>不要在搜索条件中进行索引列的运算</code>  例如以key列创建了索引，如果WHERE子句中的搜索条件是WHERE key * 2 &lt; 4，那么MySQL将使用全表扫描而不使用索引。</li>
-<li><code>表的主键设置为自动递增</code>  MySQL默认为表格的主键列创建聚簇索引，如果主键不是递增的，那么插入新记录时就有可能导致正好插入到已满的数据页的中间，此时MySQL需要进行页面分裂，并把一些数据移动到新的页面中，造成无谓的性能损耗。</li>
-<li><code>不要创建冗余和重复索引</code>  例如本身已经创建了一个针对key1\key2的联合索引，就不需要单独再为key1创建索引了</li>
-</ul>
-]]></content>
-      <categories>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
-        <tag>索引</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Welcome</title>
-    <url>/2024/05/23/Welcome/</url>
-    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
-]]></content>
-  </entry>
-  <entry>
-    <title>《MySQL是怎样运行的》（四）</title>
-    <url>/2024/09/06/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E5%9B%9B%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h1><h2 id="单表查询"><a href="#单表查询" class="headerlink" title="单表查询"></a>单表查询</h2><h3 id="访问方法"><a href="#访问方法" class="headerlink" title="访问方法"></a>访问方法</h3><ol>
-<li>MySQL执行查询语句的方式称为访问方法或者访问类型。同一个查询语句可以有多个访问方法来执行，不同访问方法进行查询的结果保持一致，但是所需的成本不同。</li>
-<li><strong>const</strong> 通过主键或者唯一二级索引列与常数的等值比较的访问方法。如果主键或者二级索引是由多个列来组成，则必须每一列都进行等值比较。<blockquote>
-<ul>
-<li>该访问方法被认为是常数级别的</li>
-<li>利用二级索引进行查询，并且查询条件为NULL时，不采用const访问方法。</li>
-</ul>
-</blockquote>
-</li>
-<li><strong>ref</strong> 通过二级索引列与常数进行等值比较，并且形成的扫描区间为单点扫描区间的访问方法。<blockquote>
-<ul>
-<li>采用二级索引来进行查询时，每找到一条符合条件的二级索引，都会立即回表查询，而不是得到所有的主键id再统一进行回表。</li>
-<li>当查询的值为NULL时，最多只能使用ref查询方法。</li>
-<li>对于索引列中包含多个列的索引来说，只要左边的列与常数进行等值比较，都可以用ref，如果是范围比较，就不能用ref。</li>
-</ul>
-</blockquote>
-</li>
-<li><strong>ref_or_null</strong> 比ref方法多了搜索条件为NULL。<blockquote>
-<ul>
-<li>值为NULL的记录会被放在索引树的最左边</li>
-</ul>
-</blockquote>
-</li>
-<li><strong>range</strong> 使用索引查询时，对应的扫描区间为若干个单点扫描区间或者范围扫描区间的单表访问方法。</li>
-<li><strong>index</strong> 扫描全部二级索引记录的访问方法。<blockquote>
-<ul>
-<li>index访问方法的应用场景可以如下：查询结果是覆盖索引中对应的列，但是搜索条件不是按索引列的从左到右来的，可能是中间某个列或者某几个列。但是由于所要的结果在索引中已经存在，不需要再次回表查询了，仅需要扫描该索引即可。</li>
-</ul>
-</blockquote>
-</li>
-<li><strong>all</strong> 执行全表扫描的访问方法。</li>
-</ol>
-<h3 id="索引合并"><a href="#索引合并" class="headerlink" title="索引合并"></a>索引合并</h3><ol>
-<li><strong>索引合并</strong> 使用多个索引来完成一次查询的方法</li>
-<li><strong>Intersection索引合并</strong> 利用不同的索引分别进行扫描，得到的结果取交集，再利用得到的结果来进行回表。<blockquote>
-<p>要求使用二级索引的必须是等值查询，并且如果是联合索引，要求每一个索引列都要覆盖。原因：当二级索引的值相同时，叶子节点是根据主键排列的，便于取交集，并且在后续回表的过程中更有利于读取信息，而不是随机I&#x2F;O。<br>select * from table where key1 &#x3D; 10 and key2 &#x3D; 20;</p>
-</blockquote>
-</li>
-<li><strong>Union索引合并</strong> 利用不同的索引分别进行扫描，得到的结果取并集，再利用得到的结果来进行回表。<blockquote>
-<p>同样要求用二级索引的必须是等值查询，并且如果是联合索引，要求每一个索引列都要覆盖。原因：便于取并集，回表时的效率也高。<br>select * from table where key1 &#x3D; 10 or key2 &#x3D; 20;</p>
-</blockquote>
-</li>
-<li><strong>sort-union索引合并</strong> 利用不同索引分别进行扫描，得到结果先排序再取并集。<blockquote>
-<p>不要求二级索引必须等值查询，也不要求联合索引的每一个列都得是等值查询<br>select * from table where key1 &gt; 10 and index_part1 &#x3D; 1;</p>
-</blockquote>
-</li>
-</ol>
-<h2 id="连接查询"><a href="#连接查询" class="headerlink" title="连接查询"></a>连接查询</h2><ul>
-<li>连接的本质就是把各个表中的记录都取出来进行一次匹配，并把匹配后的组合发送给客户端</li>
-<li><strong>驱动表</strong>即第一个需要查询的表，再根据驱动表到被<strong>驱动表</strong>中找匹配的记录。也就是说，驱动表只需要访问一次，被驱动表可能需要访问多次。每获得一条驱动表记录，都需要到被驱动表中寻找匹配的记录。</li>
-</ul>
-<h3 id="内连接"><a href="#内连接" class="headerlink" title="内连接"></a>内连接</h3><ul>
-<li>对于进行内连接查询的表，如果驱动表中的记录在被驱动表中没找到对应的，那就不会加入结果集中。</li>
-<li>内连接的查询基本步骤如下<ol>
-<li>选取驱动表，适用与驱动表相关的过滤条件，选取代价最低的单表访问方法来执行对驱动表的单表查询</li>
-<li>对步骤1中查询驱动表中得到的结果集中的每一条记录，都分别到被驱动表中查找匹配的记录。</li>
-</ol>
-</li>
-</ul>
-<h3 id="外连接"><a href="#外连接" class="headerlink" title="外连接"></a>外连接</h3><ul>
-<li>对于进行外连接查询的表(包括左外连接和右外连接)，即使驱动表中的记录在被驱动表中没找到对应的，还是会加入到结果集。</li>
-<li>左外连接 - 选择左侧的表为驱动表</li>
-<li>右外连接 - 选择右侧的表为驱动表<blockquote>
-<p>where子句中不符合条件的记录，不管是外连接还是内连接，都不会加入结果集。<br>on子句的处理方式就很符合内外连接的区别。如果不符合条件，在内连接中就不会加入结果集，但是在外连接中会加入结果集。</p>
-</blockquote>
-</li>
-</ul>
-<h2 id="计算成本"><a href="#计算成本" class="headerlink" title="计算成本"></a>计算成本</h2><ul>
-<li>一条查询语句的执行成本包括I&#x2F;O成本和CPU成本。前者指把记录从磁盘加载到内存中的时间，后者指读取记录、判断记录是否满足搜索条件、对结果进行排序等操作所损耗的时间。</li>
-<li>成本常数<ul>
-<li>读取一个页面的成本默认为1.0</li>
-<li>检测一个记录是否符合搜索条件的成本默认是0.2</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>示例：假设某查询语句需要用到索引uk_key2，且其对应的搜索条件是key2 &gt; 10 AND key2 &lt; 1000，即对应的扫描区间是(10, 1000);<br>根据 <strong>查询成本 &#x3D; I&#x2F;O成本 + CPU成本 &#x3D; （索引I&#x2F;O成本 + 记录I&#x2F;O成本）+（索引CPU成本 + 记录CPU成本）</strong>分别计算对应的值</p>
-<ol>
-<li><strong>索引I&#x2F;O成本</strong> 所谓I&#x2F;O成本即是将数据页从磁盘读取到内存的成本，MySQL认为有多少个区间就相当于有多少个页面，示例中只有一个页面，因此 <code>索引I/O成本 = 1 × 1.0</code></li>
-<li><strong>索引CPU成本</strong> 所谓CPU成本即是对记录读取、判断等操作的成本，因此需要先计算有多少条记录。计算过程为：先找到区间最左记录和区间最右记录（由于B+树中定位一条记录是常数级别的速度，因此该消耗忽略不计），然后判断两条记录的距离。如果两条记录相隔不太远，就直接读取中间数据页中的Page Header中的PAGE_N_RECS属性（代表当前页面有多少条记录），直接相加即可；如果两条记录相隔很远，则沿着区间最左记录所在页面向右读取10个页面，取每个页面记录的平均值，再乘以页面数就是总记录条数(记为N)。因此<code>索引CPU成本 = N × 0.2</code></li>
-<li><strong>记录I&#x2F;O成本</strong> 上一步已经算出总记录条数，此时需要进行回表来判断每条记录是否都符合除索引条件以外的其他条件，即需要将所在页面读取到内存中。因此<code>记录I/O成本 = N × 1</code></li>
-<li><strong>记录CPU成本</strong> 判断每条记录的具体情况。因此<code>记录CPU成本 = N × 0.2</code></li>
-</ol>
-</blockquote>
-<h3 id="单表查询成本"><a href="#单表查询成本" class="headerlink" title="单表查询成本"></a>单表查询成本</h3><ul>
-<li>执行一条查询语句的基本步骤<ol>
-<li>根据搜索条件，查找所有能用的索引</li>
-<li>计算全表扫描的成本</li>
-<li>计算使用各种索引的成本</li>
-<li>对比各种执行方案的代价，成本最低的方案就是所谓的执行计划</li>
-</ol>
-</li>
-</ul>
-<h3 id="连接查询成本"><a href="#连接查询成本" class="headerlink" title="连接查询成本"></a>连接查询成本</h3><ul>
-<li>当多张表连接查询时，驱动表访问一次，被驱动表访问多次，因此连接查询的成本是由单次查询驱动表的成本和多次查询被驱动表的成本组成。</li>
-<li>连接查询成本 &#x3D; 单次访问驱动表的成本 + 驱动表扇出值 × 单次访问被驱动表的成本<ul>
-<li>扇出 - 查询驱动表后得到的记录条数</li>
-<li>对于左外或者右外连接来说，驱动表是固定的。因此只需要分别为驱动表和被驱动表选择成本最低的访问方法</li>
-<li>对于内连接来说，驱动表和被驱动表可以互换，因此既需要考虑不同的表作为驱动表，又需要考虑当前驱动表下，驱动表和被驱动表的成本最低访问方法</li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
-        <tag>查询</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>《MySQL是怎样运行的》（五）</title>
-    <url>/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="InnoDB的表空间"><a href="#InnoDB的表空间" class="headerlink" title="InnoDB的表空间"></a>InnoDB的表空间</h1><h2 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h2><ul>
-<li>《MySQL是怎样运行的（一）》中提到，每创建一个数据库schema，就会在MySQL数据目录下创建一个同名的文件夹schema，当在数据库（指MySQL5.6.6及以后的版本）中创建一个表格table时，默认采用独立表空间，即会在schema文件夹中创建一个同名的frm文件（table.frm）和ibd文件（table.ibd）。其中frm文件记录表格的基本信息，包括表名、列名、列长度、主键以及索引等，ibd文件则存储记录、索引、MVCC等相关信息。</li>
-<li>独立表空间和系统表空间是InnoDB引擎独有的物理文件存储结构，其他引擎比如MyISAM不支持这个概念。</li>
-</ul>
-<h2 id="独立表空间"><a href="#独立表空间" class="headerlink" title="独立表空间"></a>独立表空间</h2><h3 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h3><ul>
-<li>InnoDB是以页的形式存储数据，完整的数据记录是以聚簇索引的形式存放，也就是说，完整的数据记录的存储逻辑也是B+树，不是我们主观上认为的二维表格，即聚簇索引和完整的数据记录不是分开存储的，实际上二者是一体的，聚簇索引就是完整的表格数据。</li>
-<li>每张表格对应的索引数目就是用户设置的索引数加1（聚簇索引）。</li>
-<li>每次往表格中添加记录时，会先更新聚簇索引，再更新相关的二级索引</li>
-<li>B+树的节点就是数据页，数据页之间用指针相连。数据页（也就是INDEX类型的页，详情见《MySQL是怎样运行的（二）》）由七个部分组成，其中首尾部分分别是File Header和File Trailer，这两个部分是所有类型的页面通用的。</li>
-</ul>
-<h3 id="物理结构"><a href="#物理结构" class="headerlink" title="物理结构"></a>物理结构</h3><ul>
-<li>一个idb文件对应一个表格，实际上就是一个独立表空间。每个独立表空间可以划分为多个组，每个组由256个区（extend）组成，每个区默认大小为1MB，即连续的64个页(每个页默认16KB)。<img src="./image1.png" width="60%" height="60%" /></li>
-<li>每个独立表空间中，第一个组最开始的三个页面类型是FSP_HDR\IBUF_BITMAP\INODE，其余组的最开始两个页面类型是XDES\IBUF_BITMAP。（注：每个独立表空间只有一个FSP_HDR类型的页面）</li>
-</ul>
-<h3 id="逻辑结构"><a href="#逻辑结构" class="headerlink" title="逻辑结构"></a>逻辑结构</h3><ul>
-<li>为了减少随机IO，开发者将同一个索引B+树的页面尽可能在物理存储上也放在一起，因此同一个B+树的页面尽可能分配在同一个组，同时将叶子节点和非叶子节点分开存放。</li>
-<li>开发者将每个索引在逻辑上分为两个段，分别是叶子节点段和非叶子节点段。</li>
-<li>段和区的关系<ul>
-<li>段是逻辑上的概念，区是表空间中连续的64个页面</li>
-<li>区有4种分类，分别是空闲区，有剩余页面的碎片区，没有剩余页面的碎片区、属于某个段的区</li>
-<li>碎片区的页面可以分给不同的段</li>
-</ul>
-</li>
-<li>为某个段分配存储空间的策略如下<ol>
-<li>当表格数据不多时，从碎片区选择单个空页面来分配存储空间</li>
-<li>当某个段已经占用了32个碎片区页面后，就会以完整的区来分配存储空间（原先占用的碎片区页面并不会被复制到新申请的完整区之中）</li>
-</ol>
-</li>
-</ul>
-<h3 id="详细信息"><a href="#详细信息" class="headerlink" title="详细信息"></a>详细信息</h3><h4 id="区"><a href="#区" class="headerlink" title="区"></a>区</h4><ul>
-<li>空闲区<ul>
-<li>属于整个独立表空间</li>
-<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
-<li>链表的节点类型是XDES Entry，状态为FREE，Segment ID无效<img src="./image2.png" width="50%" height="50%" />
-其中的State就是前面提到的区的分类，可选的值分别是FREE(空闲区)、FREE_FRAG(有空闲页面的碎片区)、FULL_FRAG（没有空闲页面的碎片区）、FSEG（属于某个段的区）</li>
-<li>链表头节点的类型是List Base Node<img src="./image3.png" width="60%" height="60%" /></li>
-</ul>
-</li>
-<li>碎片区<ul>
-<li>属于整个独立表空间</li>
-<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
-<li>链表的节点类型是XDES Entry，状态为FREE_FRAG（有空闲页面的碎片区）或者FULL_FRAG（没有空闲页面的碎片区），Segment ID无效</li>
-<li>链表头节点的类型是List Base Node</li>
-</ul>
-</li>
-<li>属于段的区<ul>
-<li>属于某个段</li>
-<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
-<li>链表的节点类型是XDES Entry，Segment ID为对应段的ID</li>
-<li>链表头节点的类型是List Base Node</li>
-</ul>
-</li>
-</ul>
-<h4 id="段"><a href="#段" class="headerlink" title="段"></a>段</h4><ul>
-<li>段是一个逻辑上的概念，其物理上包括多个零散的页面和多个区，其中零散的页面属于碎片区。</li>
-<li>由于每个索引都有两个段，因此也需要设计相关的结构来存储相关信息。</li>
-<li>段的属性存储在INODE Entry中，INODE Entry也由链表连接起来，属于链表的节点<img src="./image4.png" width="60%" height="60%" />
-
-<blockquote>
-<p><strong>Segment ID</strong> - 每个段独有的编号<br><strong>NOT_FULL_N_USED</strong> - 在NOT_FULL链表中已经用了多少个页面<br><strong>List Node Base</strong> - 分别记录空链表、未满链表和满链表的头结点<br><strong>Magic Number</strong> - 标记该INODE Entry是否已经完整填入相关信息，是则初始化该字段为97937874<br><strong>Fragment Array Entry</strong> - 该段对应的零散页面的页号</p>
-</blockquote>
-</li>
-</ul>
-<h4 id="页面"><a href="#页面" class="headerlink" title="页面"></a>页面</h4><ul>
-<li>前面提到，独立表空间分为多个组，每个组由256个区组成，每个区又由64个页面组成，即独立表空间可以分成多个组，每个组有256 × 64 &#x3D; 16384个页面。</li>
-<li>每个组的前几个页面是固定的。第一个组的前三个页面的页面类型分别是FSP_HDR、IBUF_BITMAP、INODE，其余组的前两个页面的页面类型分别是XDES、IBUF_BITMAP。</li>
-<li>FSP_HDR<img src="./image5.png" width="60%" height="60%" />
-* File Space Header存储整个独立表空间的属性
-
-<table>
-<thead>
-<tr>
-<th align="center">字段名称</th>
-<th align="center">占用空间(&#x2F;字节)</th>
-<th align="center">作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">Space ID</td>
-<td align="center">4</td>
-<td align="center">表空间的ID</td>
-</tr>
-<tr>
-<td align="center">Not Used</td>
-<td align="center">4</td>
-<td align="center">未使用，可忽略</td>
-</tr>
-<tr>
-<td align="center">Size</td>
-<td align="center">4</td>
-<td align="center">当前表空间拥有的页面数</td>
-</tr>
-<tr>
-<td align="center">Free Limit</td>
-<td align="center">4</td>
-<td align="center">未被初始化的最小页号，即大于或等于这个页号的页面的区对应的XDES Entry 结构没有被加入Free链表</td>
-</tr>
-<tr>
-<td align="center">Space Flags</td>
-<td align="center">4</td>
-<td align="center">表空间的一些占用存储空间比较小的属性</td>
-</tr>
-<tr>
-<td align="center">FRAG_N_USED</td>
-<td align="center">4</td>
-<td align="center">FREE_FRAG链表中已使用的页面数量</td>
-</tr>
-<tr>
-<td align="center">List Base Node for FREE list</td>
-<td align="center">16</td>
-<td align="center">FREE链表的头结点</td>
-</tr>
-<tr>
-<td align="center">List Base Node for FREE_FRAG list</td>
-<td align="center">16</td>
-<td align="center">FREE_FRAG链表的头结点</td>
-</tr>
-<tr>
-<td align="center">List Base Node for FULL_FRAG list</td>
-<td align="center">16</td>
-<td align="center">FULL_FRAG链表的头结点</td>
-</tr>
-<tr>
-<td align="center">Next Unused Segment ID</td>
-<td align="center">8</td>
-<td align="center">当前表空间中下一个未使用的Segment ID</td>
-</tr>
-<tr>
-<td align="center">List Base Node for SEG_INODES_FULL list</td>
-<td align="center">16</td>
-<td align="center">SEG_INODES_FULL链表的头结点</td>
-</tr>
-<tr>
-<td align="center">List Base Node for SEG_INODES_FREE list</td>
-<td align="center">16</td>
-<td align="center">SEG_INODES_FREE链表的头结点</td>
-</tr>
-</tbody></table>
-每个段对应的INODE Entry结构会集中存放到INODE页面中（即整个表空间的第三个页面），但如果索引很多，就会导致段很多，一个INODE页面无法完整存放所有数据，此时就会有多个INODE类型的页面来组成链表。SEG_INODES_FREE链表中的页面还有空间，SEG_INODES_FULL中的页面没有多余空间</li>
-<li>IBUF_BITMAP<ul>
-<li>记录了有关Change Buffer的相关信息</li>
-</ul>
-</li>
-<li>INODE<ul>
-<li>该类型的页面主要用于存储段的相关信息<img src="./image6.png" width="60%" height="60%" /></li>
-<li>当索引足够多时，就会导致段的数目过多，因此一个INODE页面无法存下所有的INODE Entry，需要多个INODE类型的页面来存储。此时就0号页面FSP_HDR中的SEG_INODES_FULL list和SEG_INODES_Free list相呼应</li>
-<li>存储INODE Entry的过程大致如下:每当新创建一个段<ol>
-<li>先从SEG_INODES_Free中查看是否为空，如果不空，则从中获取一个节点，相当于获取一个未写满的INODE页面，填充入新的段对应的INODE Entry。当这个页面填满后，就将其放入SEG_INODES_Full链表中</li>
-<li>如果SEG_INODES_Free链表为空，就需要从表空间的FREE_FRAG链表中申请一个新的页面，并将该页面类型修改为INODE，填入新的段对应的INODE Entry后，如果没有满，则将其放入SEG_INODES_Free中，否则放入SEG_INODES_Full中。</li>
-</ol>
-</li>
-</ul>
-</li>
-<li>XDES<ul>
-<li>与<strong>FSP_HDR</strong>页面几乎一样，只是FSP_HDR的File Space Header部分变为不进行使用</li>
-</ul>
-</li>
-</ul>
-<h2 id="系统表空间"><a href="#系统表空间" class="headerlink" title="系统表空间"></a>系统表空间</h2><ul>
-<li>整个MySQL进程只有一个系统表空间，需要记录整个系统的相关信息。</li>
-<li>系统表空间也分为若干个qu，每个区的前几个页面也是有固定的格式。</li>
-<li>关于系统表空间的内容本文不再详细描述。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
-        <tag>数据页</tag>
       </tags>
   </entry>
   <entry>
@@ -941,6 +650,297 @@
       </tags>
   </entry>
   <entry>
+    <title>《MySQL是怎样运行的》（五）</title>
+    <url>/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="InnoDB的表空间"><a href="#InnoDB的表空间" class="headerlink" title="InnoDB的表空间"></a>InnoDB的表空间</h1><h2 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h2><ul>
+<li>《MySQL是怎样运行的（一）》中提到，每创建一个数据库schema，就会在MySQL数据目录下创建一个同名的文件夹schema，当在数据库（指MySQL5.6.6及以后的版本）中创建一个表格table时，默认采用独立表空间，即会在schema文件夹中创建一个同名的frm文件（table.frm）和ibd文件（table.ibd）。其中frm文件记录表格的基本信息，包括表名、列名、列长度、主键以及索引等，ibd文件则存储记录、索引、MVCC等相关信息。</li>
+<li>独立表空间和系统表空间是InnoDB引擎独有的物理文件存储结构，其他引擎比如MyISAM不支持这个概念。</li>
+</ul>
+<h2 id="独立表空间"><a href="#独立表空间" class="headerlink" title="独立表空间"></a>独立表空间</h2><h3 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h3><ul>
+<li>InnoDB是以页的形式存储数据，完整的数据记录是以聚簇索引的形式存放，也就是说，完整的数据记录的存储逻辑也是B+树，不是我们主观上认为的二维表格，即聚簇索引和完整的数据记录不是分开存储的，实际上二者是一体的，聚簇索引就是完整的表格数据。</li>
+<li>每张表格对应的索引数目就是用户设置的索引数加1（聚簇索引）。</li>
+<li>每次往表格中添加记录时，会先更新聚簇索引，再更新相关的二级索引</li>
+<li>B+树的节点就是数据页，数据页之间用指针相连。数据页（也就是INDEX类型的页，详情见《MySQL是怎样运行的（二）》）由七个部分组成，其中首尾部分分别是File Header和File Trailer，这两个部分是所有类型的页面通用的。</li>
+</ul>
+<h3 id="物理结构"><a href="#物理结构" class="headerlink" title="物理结构"></a>物理结构</h3><ul>
+<li>一个idb文件对应一个表格，实际上就是一个独立表空间。每个独立表空间可以划分为多个组，每个组由256个区（extend）组成，每个区默认大小为1MB，即连续的64个页(每个页默认16KB)。<img src="./image1.png" width="60%" height="60%" /></li>
+<li>每个独立表空间中，第一个组最开始的三个页面类型是FSP_HDR\IBUF_BITMAP\INODE，其余组的最开始两个页面类型是XDES\IBUF_BITMAP。（注：每个独立表空间只有一个FSP_HDR类型的页面）</li>
+</ul>
+<h3 id="逻辑结构"><a href="#逻辑结构" class="headerlink" title="逻辑结构"></a>逻辑结构</h3><ul>
+<li>为了减少随机IO，开发者将同一个索引B+树的页面尽可能在物理存储上也放在一起，因此同一个B+树的页面尽可能分配在同一个组，同时将叶子节点和非叶子节点分开存放。</li>
+<li>开发者将每个索引在逻辑上分为两个段，分别是叶子节点段和非叶子节点段。</li>
+<li>段和区的关系<ul>
+<li>段是逻辑上的概念，区是表空间中连续的64个页面</li>
+<li>区有4种分类，分别是空闲区，有剩余页面的碎片区，没有剩余页面的碎片区、属于某个段的区</li>
+<li>碎片区的页面可以分给不同的段</li>
+</ul>
+</li>
+<li>为某个段分配存储空间的策略如下<ol>
+<li>当表格数据不多时，从碎片区选择单个空页面来分配存储空间</li>
+<li>当某个段已经占用了32个碎片区页面后，就会以完整的区来分配存储空间（原先占用的碎片区页面并不会被复制到新申请的完整区之中）</li>
+</ol>
+</li>
+</ul>
+<h3 id="详细信息"><a href="#详细信息" class="headerlink" title="详细信息"></a>详细信息</h3><h4 id="区"><a href="#区" class="headerlink" title="区"></a>区</h4><ul>
+<li>空闲区<ul>
+<li>属于整个独立表空间</li>
+<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
+<li>链表的节点类型是XDES Entry，状态为FREE，Segment ID无效<img src="./image2.png" width="50%" height="50%" />
+其中的State就是前面提到的区的分类，可选的值分别是FREE(空闲区)、FREE_FRAG(有空闲页面的碎片区)、FULL_FRAG（没有空闲页面的碎片区）、FSEG（属于某个段的区）</li>
+<li>链表头节点的类型是List Base Node<img src="./image3.png" width="60%" height="60%" /></li>
+</ul>
+</li>
+<li>碎片区<ul>
+<li>属于整个独立表空间</li>
+<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
+<li>链表的节点类型是XDES Entry，状态为FREE_FRAG（有空闲页面的碎片区）或者FULL_FRAG（没有空闲页面的碎片区），Segment ID无效</li>
+<li>链表头节点的类型是List Base Node</li>
+</ul>
+</li>
+<li>属于段的区<ul>
+<li>属于某个段</li>
+<li>通过链表的形式连接起来，链表头存放在第一个区中的第1个页面中（即FSP_HDR）</li>
+<li>链表的节点类型是XDES Entry，Segment ID为对应段的ID</li>
+<li>链表头节点的类型是List Base Node</li>
+</ul>
+</li>
+</ul>
+<h4 id="段"><a href="#段" class="headerlink" title="段"></a>段</h4><ul>
+<li>段是一个逻辑上的概念，其物理上包括多个零散的页面和多个区，其中零散的页面属于碎片区。</li>
+<li>由于每个索引都有两个段，因此也需要设计相关的结构来存储相关信息。</li>
+<li>段的属性存储在INODE Entry中，INODE Entry也由链表连接起来，属于链表的节点<img src="./image4.png" width="60%" height="60%" />
+
+<blockquote>
+<p><strong>Segment ID</strong> - 每个段独有的编号<br><strong>NOT_FULL_N_USED</strong> - 在NOT_FULL链表中已经用了多少个页面<br><strong>List Node Base</strong> - 分别记录空链表、未满链表和满链表的头结点<br><strong>Magic Number</strong> - 标记该INODE Entry是否已经完整填入相关信息，是则初始化该字段为97937874<br><strong>Fragment Array Entry</strong> - 该段对应的零散页面的页号</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="页面"><a href="#页面" class="headerlink" title="页面"></a>页面</h4><ul>
+<li>前面提到，独立表空间分为多个组，每个组由256个区组成，每个区又由64个页面组成，即独立表空间可以分成多个组，每个组有256 × 64 &#x3D; 16384个页面。</li>
+<li>每个组的前几个页面是固定的。第一个组的前三个页面的页面类型分别是FSP_HDR、IBUF_BITMAP、INODE，其余组的前两个页面的页面类型分别是XDES、IBUF_BITMAP。</li>
+<li>FSP_HDR<img src="./image5.png" width="60%" height="60%" />
+* File Space Header存储整个独立表空间的属性
+
+<table>
+<thead>
+<tr>
+<th align="center">字段名称</th>
+<th align="center">占用空间(&#x2F;字节)</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Space ID</td>
+<td align="center">4</td>
+<td align="center">表空间的ID</td>
+</tr>
+<tr>
+<td align="center">Not Used</td>
+<td align="center">4</td>
+<td align="center">未使用，可忽略</td>
+</tr>
+<tr>
+<td align="center">Size</td>
+<td align="center">4</td>
+<td align="center">当前表空间拥有的页面数</td>
+</tr>
+<tr>
+<td align="center">Free Limit</td>
+<td align="center">4</td>
+<td align="center">未被初始化的最小页号，即大于或等于这个页号的页面的区对应的XDES Entry 结构没有被加入Free链表</td>
+</tr>
+<tr>
+<td align="center">Space Flags</td>
+<td align="center">4</td>
+<td align="center">表空间的一些占用存储空间比较小的属性</td>
+</tr>
+<tr>
+<td align="center">FRAG_N_USED</td>
+<td align="center">4</td>
+<td align="center">FREE_FRAG链表中已使用的页面数量</td>
+</tr>
+<tr>
+<td align="center">List Base Node for FREE list</td>
+<td align="center">16</td>
+<td align="center">FREE链表的头结点</td>
+</tr>
+<tr>
+<td align="center">List Base Node for FREE_FRAG list</td>
+<td align="center">16</td>
+<td align="center">FREE_FRAG链表的头结点</td>
+</tr>
+<tr>
+<td align="center">List Base Node for FULL_FRAG list</td>
+<td align="center">16</td>
+<td align="center">FULL_FRAG链表的头结点</td>
+</tr>
+<tr>
+<td align="center">Next Unused Segment ID</td>
+<td align="center">8</td>
+<td align="center">当前表空间中下一个未使用的Segment ID</td>
+</tr>
+<tr>
+<td align="center">List Base Node for SEG_INODES_FULL list</td>
+<td align="center">16</td>
+<td align="center">SEG_INODES_FULL链表的头结点</td>
+</tr>
+<tr>
+<td align="center">List Base Node for SEG_INODES_FREE list</td>
+<td align="center">16</td>
+<td align="center">SEG_INODES_FREE链表的头结点</td>
+</tr>
+</tbody></table>
+每个段对应的INODE Entry结构会集中存放到INODE页面中（即整个表空间的第三个页面），但如果索引很多，就会导致段很多，一个INODE页面无法完整存放所有数据，此时就会有多个INODE类型的页面来组成链表。SEG_INODES_FREE链表中的页面还有空间，SEG_INODES_FULL中的页面没有多余空间</li>
+<li>IBUF_BITMAP<ul>
+<li>记录了有关Change Buffer的相关信息</li>
+</ul>
+</li>
+<li>INODE<ul>
+<li>该类型的页面主要用于存储段的相关信息<img src="./image6.png" width="60%" height="60%" /></li>
+<li>当索引足够多时，就会导致段的数目过多，因此一个INODE页面无法存下所有的INODE Entry，需要多个INODE类型的页面来存储。此时就0号页面FSP_HDR中的SEG_INODES_FULL list和SEG_INODES_Free list相呼应</li>
+<li>存储INODE Entry的过程大致如下:每当新创建一个段<ol>
+<li>先从SEG_INODES_Free中查看是否为空，如果不空，则从中获取一个节点，相当于获取一个未写满的INODE页面，填充入新的段对应的INODE Entry。当这个页面填满后，就将其放入SEG_INODES_Full链表中</li>
+<li>如果SEG_INODES_Free链表为空，就需要从表空间的FREE_FRAG链表中申请一个新的页面，并将该页面类型修改为INODE，填入新的段对应的INODE Entry后，如果没有满，则将其放入SEG_INODES_Free中，否则放入SEG_INODES_Full中。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>XDES<ul>
+<li>与<strong>FSP_HDR</strong>页面几乎一样，只是FSP_HDR的File Space Header部分变为不进行使用</li>
+</ul>
+</li>
+</ul>
+<h2 id="系统表空间"><a href="#系统表空间" class="headerlink" title="系统表空间"></a>系统表空间</h2><ul>
+<li>整个MySQL进程只有一个系统表空间，需要记录整个系统的相关信息。</li>
+<li>系统表空间也分为若干个qu，每个区的前几个页面也是有固定的格式。</li>
+<li>关于系统表空间的内容本文不再详细描述。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+        <tag>数据页</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>《MySQL是怎样运行的》（四）</title>
+    <url>/2024/09/06/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E5%9B%9B%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h1><h2 id="单表查询"><a href="#单表查询" class="headerlink" title="单表查询"></a>单表查询</h2><h3 id="访问方法"><a href="#访问方法" class="headerlink" title="访问方法"></a>访问方法</h3><ol>
+<li>MySQL执行查询语句的方式称为访问方法或者访问类型。同一个查询语句可以有多个访问方法来执行，不同访问方法进行查询的结果保持一致，但是所需的成本不同。</li>
+<li><strong>const</strong> 通过主键或者唯一二级索引列与常数的等值比较的访问方法。如果主键或者二级索引是由多个列来组成，则必须每一列都进行等值比较。<blockquote>
+<ul>
+<li>该访问方法被认为是常数级别的</li>
+<li>利用二级索引进行查询，并且查询条件为NULL时，不采用const访问方法。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>ref</strong> 通过二级索引列与常数进行等值比较，并且形成的扫描区间为单点扫描区间的访问方法。<blockquote>
+<ul>
+<li>采用二级索引来进行查询时，每找到一条符合条件的二级索引，都会立即回表查询，而不是得到所有的主键id再统一进行回表。</li>
+<li>当查询的值为NULL时，最多只能使用ref查询方法。</li>
+<li>对于索引列中包含多个列的索引来说，只要左边的列与常数进行等值比较，都可以用ref，如果是范围比较，就不能用ref。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>ref_or_null</strong> 比ref方法多了搜索条件为NULL。<blockquote>
+<ul>
+<li>值为NULL的记录会被放在索引树的最左边</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>range</strong> 使用索引查询时，对应的扫描区间为若干个单点扫描区间或者范围扫描区间的单表访问方法。</li>
+<li><strong>index</strong> 扫描全部二级索引记录的访问方法。<blockquote>
+<ul>
+<li>index访问方法的应用场景可以如下：查询结果是覆盖索引中对应的列，但是搜索条件不是按索引列的从左到右来的，可能是中间某个列或者某几个列。但是由于所要的结果在索引中已经存在，不需要再次回表查询了，仅需要扫描该索引即可。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>all</strong> 执行全表扫描的访问方法。</li>
+</ol>
+<h3 id="索引合并"><a href="#索引合并" class="headerlink" title="索引合并"></a>索引合并</h3><ol>
+<li><strong>索引合并</strong> 使用多个索引来完成一次查询的方法</li>
+<li><strong>Intersection索引合并</strong> 利用不同的索引分别进行扫描，得到的结果取交集，再利用得到的结果来进行回表。<blockquote>
+<p>要求使用二级索引的必须是等值查询，并且如果是联合索引，要求每一个索引列都要覆盖。原因：当二级索引的值相同时，叶子节点是根据主键排列的，便于取交集，并且在后续回表的过程中更有利于读取信息，而不是随机I&#x2F;O。<br>select * from table where key1 &#x3D; 10 and key2 &#x3D; 20;</p>
+</blockquote>
+</li>
+<li><strong>Union索引合并</strong> 利用不同的索引分别进行扫描，得到的结果取并集，再利用得到的结果来进行回表。<blockquote>
+<p>同样要求用二级索引的必须是等值查询，并且如果是联合索引，要求每一个索引列都要覆盖。原因：便于取并集，回表时的效率也高。<br>select * from table where key1 &#x3D; 10 or key2 &#x3D; 20;</p>
+</blockquote>
+</li>
+<li><strong>sort-union索引合并</strong> 利用不同索引分别进行扫描，得到结果先排序再取并集。<blockquote>
+<p>不要求二级索引必须等值查询，也不要求联合索引的每一个列都得是等值查询<br>select * from table where key1 &gt; 10 and index_part1 &#x3D; 1;</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="连接查询"><a href="#连接查询" class="headerlink" title="连接查询"></a>连接查询</h2><ul>
+<li>连接的本质就是把各个表中的记录都取出来进行一次匹配，并把匹配后的组合发送给客户端</li>
+<li><strong>驱动表</strong>即第一个需要查询的表，再根据驱动表到被<strong>驱动表</strong>中找匹配的记录。也就是说，驱动表只需要访问一次，被驱动表可能需要访问多次。每获得一条驱动表记录，都需要到被驱动表中寻找匹配的记录。</li>
+</ul>
+<h3 id="内连接"><a href="#内连接" class="headerlink" title="内连接"></a>内连接</h3><ul>
+<li>对于进行内连接查询的表，如果驱动表中的记录在被驱动表中没找到对应的，那就不会加入结果集中。</li>
+<li>内连接的查询基本步骤如下<ol>
+<li>选取驱动表，适用与驱动表相关的过滤条件，选取代价最低的单表访问方法来执行对驱动表的单表查询</li>
+<li>对步骤1中查询驱动表中得到的结果集中的每一条记录，都分别到被驱动表中查找匹配的记录。</li>
+</ol>
+</li>
+</ul>
+<h3 id="外连接"><a href="#外连接" class="headerlink" title="外连接"></a>外连接</h3><ul>
+<li>对于进行外连接查询的表(包括左外连接和右外连接)，即使驱动表中的记录在被驱动表中没找到对应的，还是会加入到结果集。</li>
+<li>左外连接 - 选择左侧的表为驱动表</li>
+<li>右外连接 - 选择右侧的表为驱动表<blockquote>
+<p>where子句中不符合条件的记录，不管是外连接还是内连接，都不会加入结果集。<br>on子句的处理方式就很符合内外连接的区别。如果不符合条件，在内连接中就不会加入结果集，但是在外连接中会加入结果集。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="计算成本"><a href="#计算成本" class="headerlink" title="计算成本"></a>计算成本</h2><ul>
+<li>一条查询语句的执行成本包括I&#x2F;O成本和CPU成本。前者指把记录从磁盘加载到内存中的时间，后者指读取记录、判断记录是否满足搜索条件、对结果进行排序等操作所损耗的时间。</li>
+<li>成本常数<ul>
+<li>读取一个页面的成本默认为1.0</li>
+<li>检测一个记录是否符合搜索条件的成本默认是0.2</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>示例：假设某查询语句需要用到索引uk_key2，且其对应的搜索条件是key2 &gt; 10 AND key2 &lt; 1000，即对应的扫描区间是(10, 1000);<br>根据 <strong>查询成本 &#x3D; I&#x2F;O成本 + CPU成本 &#x3D; （索引I&#x2F;O成本 + 记录I&#x2F;O成本）+（索引CPU成本 + 记录CPU成本）</strong>分别计算对应的值</p>
+<ol>
+<li><strong>索引I&#x2F;O成本</strong> 所谓I&#x2F;O成本即是将数据页从磁盘读取到内存的成本，MySQL认为有多少个区间就相当于有多少个页面，示例中只有一个页面，因此 <code>索引I/O成本 = 1 × 1.0</code></li>
+<li><strong>索引CPU成本</strong> 所谓CPU成本即是对记录读取、判断等操作的成本，因此需要先计算有多少条记录。计算过程为：先找到区间最左记录和区间最右记录（由于B+树中定位一条记录是常数级别的速度，因此该消耗忽略不计），然后判断两条记录的距离。如果两条记录相隔不太远，就直接读取中间数据页中的Page Header中的PAGE_N_RECS属性（代表当前页面有多少条记录），直接相加即可；如果两条记录相隔很远，则沿着区间最左记录所在页面向右读取10个页面，取每个页面记录的平均值，再乘以页面数就是总记录条数(记为N)。因此<code>索引CPU成本 = N × 0.2</code></li>
+<li><strong>记录I&#x2F;O成本</strong> 上一步已经算出总记录条数，此时需要进行回表来判断每条记录是否都符合除索引条件以外的其他条件，即需要将所在页面读取到内存中。因此<code>记录I/O成本 = N × 1</code></li>
+<li><strong>记录CPU成本</strong> 判断每条记录的具体情况。因此<code>记录CPU成本 = N × 0.2</code></li>
+</ol>
+</blockquote>
+<h3 id="单表查询成本"><a href="#单表查询成本" class="headerlink" title="单表查询成本"></a>单表查询成本</h3><ul>
+<li>执行一条查询语句的基本步骤<ol>
+<li>根据搜索条件，查找所有能用的索引</li>
+<li>计算全表扫描的成本</li>
+<li>计算使用各种索引的成本</li>
+<li>对比各种执行方案的代价，成本最低的方案就是所谓的执行计划</li>
+</ol>
+</li>
+</ul>
+<h3 id="连接查询成本"><a href="#连接查询成本" class="headerlink" title="连接查询成本"></a>连接查询成本</h3><ul>
+<li>当多张表连接查询时，驱动表访问一次，被驱动表访问多次，因此连接查询的成本是由单次查询驱动表的成本和多次查询被驱动表的成本组成。</li>
+<li>连接查询成本 &#x3D; 单次访问驱动表的成本 + 驱动表扇出值 × 单次访问被驱动表的成本<ul>
+<li>扇出 - 查询驱动表后得到的记录条数</li>
+<li>对于左外或者右外连接来说，驱动表是固定的。因此只需要分别为驱动表和被驱动表选择成本最低的访问方法</li>
+<li>对于内连接来说，驱动表和被驱动表可以互换，因此既需要考虑不同的表作为驱动表，又需要考虑当前驱动表下，驱动表和被驱动表的成本最低访问方法</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+        <tag>查询</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>搭建个人博客(Hexo + Github)</title>
     <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
     <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
@@ -1049,6 +1049,133 @@
       <tags>
         <tag>blog</tag>
         <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据库管理系统模糊测试综述阅读笔记</title>
+    <url>/2024/10/21/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95%E7%BB%BC%E8%BF%B0%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="数据库管理系统模糊测试综述阅读笔记"><a href="#数据库管理系统模糊测试综述阅读笔记" class="headerlink" title="数据库管理系统模糊测试综述阅读笔记"></a>数据库管理系统模糊测试综述阅读笔记</h1><blockquote>
+<p>梁杰,吴志镛,符景洲,朱娟,姜宇,孙家广.数据库管理系统模糊测试技术研究综述.软件学报,,():1-25</p>
+</blockquote>
+<h2 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h2><h3 id="模糊测试"><a href="#模糊测试" class="headerlink" title="模糊测试"></a>模糊测试</h3><ul>
+<li>定义：通过产生大量随机输入来对程序进行测试，一旦程序出现异常行为或状态，就认为程序存在问题</li>
+<li>模糊测试的输入称为种子，如何产生种子是其最重要的问题。模糊测试产生种子可以分为基于生成和基于变异。前者利用目标程序的语法进行建模，依靠模型来产生符合格式的输入；后者一般需要初始种子，然后采用遗传算法对种子进变异，尽可能地探索程序的状态，通过种子执行时的覆盖信息来对决定是否对种子加以保留并进一步变异。</li>
+</ul>
+<h3 id="数据库管理系统"><a href="#数据库管理系统" class="headerlink" title="数据库管理系统"></a>数据库管理系统</h3><ul>
+<li>执行过程：解析 → 验证 → 优化 → 执行（以MySQL为例）<ul>
+<li>解析：通过词法分析和语法分析，将语句拆成Token，从而构建语法树</li>
+<li>验证：通过语义分析，判断执行命令的语义和逻辑是否符合要求，比如需要查询的表格是否存在，用户是否有权限访问等</li>
+<li>优化：根据索引或者元数据的相关信息生成执行的多种方案，依据最小成本（I&#x2F;O成本和CPU成本）选择合适的执行方案</li>
+<li>执行：调用对应的存储引擎（MyIsam、Innodb等）来执行方案</li>
+</ul>
+</li>
+</ul>
+<h3 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h3><ul>
+<li>功能性测试 <ul>
+<li>查询功能测试 - 测试各种操作的正确性，例如数据定义、插入、更新等</li>
+<li>数据完整性测试 - 确保数据存储、更新和删除的正确性，验证数据完整性约束的有效性</li>
+<li>事务处理测试 - 验证DBMS对事物的支持和正确处理</li>
+</ul>
+</li>
+<li>性能测试<ul>
+<li>评估DBMS的性能、负载容量和可伸缩性</li>
+</ul>
+</li>
+<li>安全性测试<ul>
+<li>主要包括安全漏洞测试、数据保护测试和访问控制测试</li>
+</ul>
+</li>
+<li>可用性测试 - 验证DBMS在各种条件下的可用性和容错能力</li>
+</ul>
+<h3 id="基本框架"><a href="#基本框架" class="headerlink" title="基本框架"></a>基本框架</h3><p>论文中提供的基本框架如下图所示：</p>
+<img src="./image1.png" width="60%" height="60%" />
+
+<p><strong>总体思路</strong>：查询合成器持续合成SQL语句以生成数据和查询，并输入到对应的数据库管理系统，针对测试需求定义好测试准则，漏洞判定器对DBMS行为是否异常进行判定，最终给出漏洞报告。</p>
+<p><strong>挑战</strong></p>
+<ol>
+<li>输入需要满足语法和语义的正确性，因此模糊测试工具需要分析上下文的依赖关系。</li>
+<li>需要得到DBMS的测试覆盖率。DBMS涉及多种查询语言、事务管理、并发控制、安全机制等，导致测试空间庞大，因此覆盖所有可能的路径和组合非常困难。其次，DBMS还会根据命令对其进行优化后生成多种方案，再从中选择成本低的执行方案，因此覆盖所有的查询和优化组合也非常困难。</li>
+<li>需要应对DBMS在不同特性要求上的挑战。模糊测试工具一般通过AddressSanitizer（ASAN）来检测内存安全问题，通过差分测试、蜕变测试来检测逻辑问题，通过性能回归来检测性能问题。</li>
+<li>DBMS为了保证其服务的稳定性，会隐式处理异常，因此进行模糊测试时采用以下方法来捕捉异常：在操作系统层面使用信号处理器、使用调试器运行待测程序、在DBMS中插入代理器等。</li>
+<li>由于DBMS内部状态复杂，漏洞对应的现场和触发条件难以保存。因此模糊测试工具会周期性重置数据库状态并记录所有被执行的测试用例。</li>
+<li>不同的DBMS除了通用的SQL语言规范，还有自己的语法和方言，因此一般通过自动化分析数据库管理系统的文法，及人工辅助添加文法处理逻辑来进行不同数据库管理系统的适配。</li>
+</ol>
+<h3 id="模糊测试工具需要支持的维度"><a href="#模糊测试工具需要支持的维度" class="headerlink" title="模糊测试工具需要支持的维度"></a>模糊测试工具需要支持的维度</h3><img src="./image2.png" width="60%" height="60%" />
+
+<p>相比于通用的fuzzer，DBMS模糊测试工具有几个需要重点注意的问题：首先是生成的输入必须具有语法正确性和语义正确性，否则DBMS在解析、验证阶段就会中止该输入的进一步执行；其次，模糊测试工具需要能够判断DBMS是否出现异常，要有测试准测和判定方法；第三，DBMS种类繁多，不同类型的数据库语法要求、接口设定也不尽相同，因此需要适配不同类型的DBMS接口。</p>
+<h2 id="不同漏洞类型对应的测试准则"><a href="#不同漏洞类型对应的测试准则" class="headerlink" title="不同漏洞类型对应的测试准则"></a>不同漏洞类型对应的测试准则</h2><p>典型的DBMS漏洞类型包括逻辑漏洞、崩溃漏洞以及性能漏洞。针对不同类型的漏洞，不同的模糊测试工具提供了不同的测试准则。</p>
+<h3 id="针对崩溃漏洞"><a href="#针对崩溃漏洞" class="headerlink" title="针对崩溃漏洞"></a>针对崩溃漏洞</h3><ul>
+<li>模糊测试工具的基本工作流程是根据语法语义要求生成测试用例、执行输入、检测崩溃。由于第二和第三个步骤是模糊测试工具共有的功能，因此对于DBMS模糊测试工具而言，其技术难点主要在于如何生成语法语义正确的测试用例。主要方法有两种：通过语法建模来生成，或者通过SQL语句变异来生成。</li>
+<li><code>语法建模</code> 根据文法建立抽象语法树，然后查询当前数据库中已有的数据，根据语法树的规则将数据填充到语法树的节点中，从而生成符合条件的SQL语句。</li>
+<li><code>SQL语句变异</code> 其基本思路是：代码覆盖分支数能够反映模糊测试工具的有效性，因此如果某个输入能够触发更多的代码分支覆盖，那么认为其是一个有意义的输入。同时为了保证语法语义的正确性，可以设计中间表示，将每个SQL转为中间表示后再对结构节点或者数据节点进行变异（类似于构建语法树+变异）。</li>
+</ul>
+<h3 id="针对逻辑漏洞"><a href="#针对逻辑漏洞" class="headerlink" title="针对逻辑漏洞"></a>针对逻辑漏洞</h3><ul>
+<li>逻辑漏洞指DBMS没有实现预定的功能，比如查询返回预定的结果，插入预定的数据等。检测该漏洞需要在实验前确定预定结果，通过比较预定结果和实验结果来判定是否存在逻辑漏洞。</li>
+<li>常见的针对逻辑漏洞的测试准测是差分测试和蜕变测试。前者是通过与另一个相似的DBMS中获取预期结果，后者则是通过构造一组具有蜕变关系的测试用例，分别执行这一组中的原始测试用例和衍生测试用例，判断两个测试用例的执行结果是否符合预期的蜕变关系。</li>
+<li>另外，由于DBMS的功能特性繁多，因此此前设计的模糊测试工具也有提出自己的测试准则，有意去针对某一类型的功能来进行模糊测试。例如SQLancer就提出了PQS、NoREC和TLP。<ul>
+<li><code>PQS</code> 合成一个包含预定义行的查询，如果查询结果不包含这一行，则认为存在逻辑漏洞</li>
+<li><code>NoREC</code> 将一个能够被优化的查询转为一个不能被优化的查询，如果优化前后的查询结果不一致，则认为存在逻辑漏洞</li>
+<li><code>TLP</code> 将一个查询拆分为多个子查询，如果子查询结果的并集不等于原查询，则认为存在逻辑漏洞</li>
+</ul>
+</li>
+</ul>
+<h3 id="针对性能漏洞"><a href="#针对性能漏洞" class="headerlink" title="针对性能漏洞"></a>针对性能漏洞</h3><ul>
+<li>性能漏洞通常指DBMS不能在给定时间内返回执行结果。但是<strong>给定时间</strong>是一个比较主观的概念，很难有统一的标准。针对这一类型的漏洞，通常是比较同一DBMS不同版本的执行时间，来判断是否存在性能漏洞；或者是生成具有相同语义的不同语句来进行测试，如果执行时间差距过大，则认为也存在性能漏洞。</li>
+</ul>
+<h2 id="模糊测试不同阶段的关键技术"><a href="#模糊测试不同阶段的关键技术" class="headerlink" title="模糊测试不同阶段的关键技术"></a>模糊测试不同阶段的关键技术</h2><p>模糊测试的主要流程包括：生成测试用例、执行输入、判断异常。对于DBMS而言，生成测试用例即合成符合语法语义正确性的SQL语句，涉及SQL表达式合成技术，可以通过建模或者变异输入的形式来生成新的输入，而变异的方向则依赖于代码覆盖率，因此还涉及代码覆盖追踪技术。最后，判断DBMS的异常则依赖于测试准则构建技术。</p>
+<p>“这 3 个关键技术相互依赖, 共同构建起了一个完整的数据库管理系统模糊测试工具。SQL 表达式合成技术提供了多样化的输入生成能力，代码覆盖追踪技术确保了测试覆盖范围的有效性，而测试准则构建技术帮助我们判定测试结果的合法性。” [引自原文]</p>
+<h3 id="SQL表达式合成技术"><a href="#SQL表达式合成技术" class="headerlink" title="SQL表达式合成技术"></a>SQL表达式合成技术</h3><ol>
+<li><p>基于生成</p>
+<ul>
+<li><p>模糊测试工具将DBMS的文法转换为对应的抽象语法树树（AST树，类似汇编），然后提取数据库中的元数据（比如表结构、列数据类型等），将其填充到节点中，最终将树转化为对应的SQL语句。下图是论文构建的一个查询语句的抽象语法树示例，可以看到每个整个树是一个完整的SQL语句，由select子句、from子句和where子句构成，每一个子句还可以递归地由新的子句构成，通过往节点中填充数据，模糊测试工具就能生成大量的符合语法语义正确性的SQL语句。</p>
+<img src="./image3.png" width="60%" height="60%" />
+</li>
+<li><p>采用基于生成的技术的模糊测试工具有SQLsmith、RAGS、Apollo、Amoeba、SQLancer等。值得注意的是，为了提高模糊测试的效率和准确率，不同的工具对SQL语句的生成和执行进行了进一步的优化。例如SQLsmith在执行测试用例的时候，是以事务的形式，验证DBMS正常运行后会回滚，防止当前查询对后续测试的影响。Apollo会为每个子句设定一个概率，为概率高的子句合成更多的测试用例等。</p>
+</li>
+</ul>
+</li>
+<li><p>基于变异</p>
+<ul>
+<li>基于变异的测试用例生成是传统模糊测试的常用方法，但是在进行DBMS的测试时，会出现大量经过变异得到的测试用例无法通过语法语义检查的结果，因此不能简单地对初始种子进行变异。</li>
+<li>DBMS模糊测试工具常用的变异方法是通过建模来对SQL表达式的结构或者数据进行变异。模糊测试工具可以构建AST树或者某种中间形式（例如IR），对语法树或者中间形式中的结构节点进行替换（比如将where语句替换成order by语句），或者变异数据节点，来确保生成的SQL语句能够通过语法语义检查。</li>
+<li>采用基于变异的SQL生成的测试工具有Squirrel、Ratel、DynSQL、SQLRight和Griffin等。</li>
+</ul>
+</li>
+</ol>
+<h3 id="代码追踪覆盖技术"><a href="#代码追踪覆盖技术" class="headerlink" title="代码追踪覆盖技术"></a>代码追踪覆盖技术</h3><p>“代码覆盖追踪技术的核心思想是通过监控和分析数据库管理系统的代码执行路径和分支覆盖情况，引导测试用例的生成和变异，以增加对未被覆盖的代码的探索能力。” [引自原文]</p>
+<img src="./image4.png" width="60%" height="60%" />
+
+<p>上图引自原文。可以看到代码追踪覆盖做技术主要包括源码基本块识别、插桩以及覆盖率跟踪等主要环节。模糊测试工具根据测试用例对代码的覆盖情况，修改选择策略和变异策略，指导生成能够覆盖更多基本块和分支的测试用例。</p>
+<h3 id="测试准则构建技术"><a href="#测试准则构建技术" class="headerlink" title="测试准则构建技术"></a>测试准则构建技术</h3><p>“测试准则构建技术的核心思想是根据数据库管理系统的特性和潜在漏洞的特点，构建相应的规则，同时指导测试用例的生成和变异. 这些准则可以包括关于查询结果、函数调用、边界条件、异常情况等方面的规则, 以确保生成的测试用例能够更全面地覆盖潜在漏洞的场景和情况。”[引自原文]</p>
+<ol>
+<li>基于传统方式构建测试准则<ul>
+<li>传统模糊测试方式主要通过监视待测程序是否崩溃。比如检测系统信号、插入ASAN等。</li>
+</ul>
+</li>
+<li>基于差分测试构建测试准则<ul>
+<li>将同一个测试用例交由不同的DBMS来执行，通过比较执行结果来判断是否存在漏洞</li>
+</ul>
+</li>
+<li>基于蜕变测试构建测试准则<ul>
+<li>蜕变测试的难点在于构造一组具有蜕变关系的测试用例，分别执行这一组中的原始测试用例和衍生测试用例，判断两个测试用例的执行结果是否符合预期的蜕变关系。</li>
+</ul>
+</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>相比于其他类型的程序，DBMS在执行输入前会判断测试用例是否符合语法语义的要求，因此DBMS的fuzzer需要构建具有正确性的测试用例。基于生成的SQL合成技术虽然能够得到更多符合语法语义的测试用例，但是相应的代码分支覆盖率较低；基于变异的SQL合成技术虽然可以覆盖更多的分支，但是会导致生成的测试用例出现语义错误。</li>
+<li>由于DBMS的分支众多，基本块数目庞大，因此在分析测试用例的代码覆盖率时，需要进一步优化以往的代码覆盖技术。并且原文中的实验证明，目前的fuzzer更多地涉及数据维护相关的组件，但是其他部分比如事务、用户管理等组件没有得到充分的测试。</li>
+<li>考虑到DBMS的状态复杂，有时候出现崩溃的原因不是直接由当前的测试用例引起，有可能与很久之前的执行相关，因此复现漏洞存在难度。</li>
+<li>DBMS种类繁多，且不同的DBMS具有不同的特征和语法，因此单一模糊测试工具的通用性较低。</li>
+<li>之前研究的DBMS的fuzzer主要针对关系型数据库，非关系型数据库如Redis的研究空缺还很大。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>论文阅读</category>
+      </categories>
+      <tags>
+        <tag>模糊测试</tag>
+        <tag>数据库管理系统</tag>
+        <tag>综述</tag>
       </tags>
   </entry>
 </search>
