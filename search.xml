@@ -1178,4 +1178,108 @@
         <tag>综述</tag>
       </tags>
   </entry>
+  <entry>
+    <title>浅谈Redis对象和数据类型</title>
+    <url>/2025/01/11/%E6%B5%85%E8%B0%88Redis%E5%AF%B9%E8%B1%A1%E5%92%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/</url>
+    <content><![CDATA[<h1 id="浅谈Redis对象和数据类型"><a href="#浅谈Redis对象和数据类型" class="headerlink" title="浅谈Redis对象和数据类型"></a>浅谈Redis对象和数据类型</h1><h2 id="Redis对象"><a href="#Redis对象" class="headerlink" title="Redis对象"></a>Redis对象</h2><p><code>下文中的redis源码选自</code><a href="https://github.com/redis/redis/tree/8.0">redis8.0</a></p>
+<ol>
+<li><p>Redis定义了多种数据类型（SDS, linkedlist, dict(也叫hashtable), skiplist, intset, ziplist）和多种对象类型（String, List, Hash, Set, Sortedset），其中每种对象类型的底层至少对应一种数据类型</p>
+</li>
+<li><p>String - 简单动态字符串（SDS），预分配空间来减少内存的频繁分配；容量小于1M之前，扩容都是翻倍，超过1M之后，每次只增加1M；最大长度为512M</p>
+</li>
+<li><p>List </p>
+<ul>
+<li>元素数量较少且元素大小较小时，底层是ziplist</li>
+<li>元素数量较多时，底层是quicklist(linkedlist + ziplist)</li>
+</ul>
+</li>
+<li><p>Hash</p>
+<ul>
+<li>ziplist：键值对数量少并且每个键值对的字符串长度小</li>
+<li>dict(hashtable) : 数组 + 链表</li>
+<li>渐进式rehash</li>
+</ul>
+</li>
+<li><p>Set</p>
+<ul>
+<li>无序</li>
+<li>intset：当集合保存的元素数量很少（512）并且全部都是整数值</li>
+<li>hashtable：value全部为NULL</li>
+</ul>
+</li>
+<li><p>Sortedset - 容器型</p>
+<ul>
+<li>有序(默认升序)， value:score</li>
+<li>ziplist(元素数量少128且所有元素成员长度小64)</li>
+<li>zset: skiplist + dict</li>
+</ul>
+</li>
+</ol>
+<h2 id="Redis数据结构"><a href="#Redis数据结构" class="headerlink" title="Redis数据结构"></a>Redis数据结构</h2><h4 id="SDS"><a href="#SDS" class="headerlink" title="SDS"></a>SDS</h4><ul>
+<li><p>在Redis中，可能会被修改的字符串类型都用它自定义的一个结构SDS来描述，只有一定不会更改的字面量才会使用C字符串</p>
+</li>
+<li><p>SDS(simple dynamic string,简单动态字符串)的定义包括当前字符串长度、已分配的空间大小、标志位以及字符串本身</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// src/sds.h</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> __<span class="title">attribute__</span> ((__<span class="title">packed__</span>)) <span class="title">sdshdr16</span> &#123;</span></span><br><span class="line">  <span class="type">uint16_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">  <span class="type">uint16_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">  <span class="type">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>SDS的优点（相比于C字符串）</p>
+<ul>
+<li>得到字符串长度不需要遍历字符串，将时间复杂度从O(N)变为O(1)</li>
+<li>二进制安全<ul>
+<li>由于字符串的长度已经通过len来记录，因此不需要从\0来判断字符串是否结束，故字符串类型可以存储二进制数据</li>
+</ul>
+</li>
+<li>空间预分配和惰性空间释放<ul>
+<li>空间预分配：在扩展SDS空间之前，会先判断剩余空间是否足够，如果足够则直接使用；否则再判断所需空间是否大于1MB，不是则多分配和所需空间一样大小的未使用空间（例如所需空间是16B，则最终分配16B（将要被使用）+16B（不使用）+1B（字符串结束符号\0）&#x3D; 33B大小的空间），是则多分配1MB空间（例如所需空间3MB，则最终分配 3MB + 1MB + 1B 大小的空间）。</li>
+<li>惰性空间释放：当字符串所使用的空间变少之后（例如删除某个字符），不会立刻回收该字符串所占据的空间，而是将其归到not use中。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h3 id="Dict-HashTable"><a href="#Dict-HashTable" class="headerlink" title="Dict(HashTable)"></a>Dict(HashTable)</h3><ul>
+<li><p>Hash的底层数据结构是哈希表。存储键值对时，会先根据键计算哈希值(siphash)和索引，然后将值存放到哈希表中对应索引处。</p>
+<ul>
+<li>计算哈希值: <figure class="highlight c"><table><tr><td class="code"><pre><span class="line">hash = dictHashKey(d, key, d-&gt;useStoredKeyApi);</span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">uint64_t</span> <span class="title function_">dictHashKey</span><span class="params">(dict *d, <span class="type">const</span> <span class="type">void</span> *key, <span class="type">int</span> isStoredKey)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (isStoredKey &amp;&amp; d-&gt;type-&gt;storedHashFunction)</span><br><span class="line">    <span class="keyword">return</span> d-&gt;type-&gt;storedHashFunction(key);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="keyword">return</span> d-&gt;type-&gt;hashFunction(key);</span><br><span class="line">    <span class="comment">// d-&gt;type-&gt;hashFunction默认指向dictGenHashFunction</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>计算索引： <code>idx = hash &amp; DICTHT_SIZE_MASK(d-&gt;ht_size_exp[0]);</code></li>
+</ul>
+</li>
+<li><p>Hash的源码如下</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// src/dict.h</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dict</span> &#123;</span></span><br><span class="line">  dictType *type;</span><br><span class="line"></span><br><span class="line">  dictEntry **ht_table[<span class="number">2</span>];</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">long</span> ht_used[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">  <span class="type">long</span> rehashidx; <span class="comment">/* rehashing not in progress if rehashidx == -1 */</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Keep small vars at end for optimal (minimal) struct padding */</span></span><br><span class="line">  <span class="type">unsigned</span> pauserehash : <span class="number">15</span>; <span class="comment">/* If &gt;0 rehashing is paused */</span></span><br><span class="line"></span><br><span class="line">  <span class="type">unsigned</span> useStoredKeyApi : <span class="number">1</span>; <span class="comment">/* See comment of storedHashFunction above */</span></span><br><span class="line">  <span class="type">signed</span> <span class="type">char</span> ht_size_exp[<span class="number">2</span>]; <span class="comment">/* exponent of size. (size = 1&lt;&lt;exp) */</span></span><br><span class="line">  <span class="type">int16_t</span> pauseAutoResize;  <span class="comment">/* If &gt;0 automatic resizing is disallowed (&lt;0 indicates coding error) */</span></span><br><span class="line">  <span class="type">void</span> *metadata[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>type指向一系列回调函数，可以根据当前类型来设定不同的函数，例如type-&gt;hashFunction()可以计算对应的哈希值</li>
+<li>ht_table是一个包含两个dictEntry指针的数组（用于渐进式rehash）,dictEntry结构体中的next指针指向下一个节点，该节点和当前节点拥有相同的哈希值<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// src/dict.c</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> &#123;</span></span><br><span class="line">  <span class="type">void</span> *key;</span><br><span class="line">  <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">    <span class="type">void</span> *val;</span><br><span class="line">    <span class="type">uint64_t</span> u64;</span><br><span class="line">    <span class="type">int64_t</span> s64;</span><br><span class="line">    <span class="type">double</span> d;</span><br><span class="line">  &#125; v;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> *<span class="title">next</span>;</span>     <span class="comment">/* Next entry in the same hash bucket. */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></li>
+<li>ht_used对应两个ht_table，分别表示每个哈希表当前存储的键值对的数量</li>
+<li>rehashidx表示rehash的进度，当其值为-1时表示没有在rehash</li>
+</ul>
+</li>
+<li><p>哈希冲突</p>
+<ul>
+<li>当有两个或以上的键被分配到了同一个索引上面，就会出现哈希冲突</li>
+<li>通过链表来解决冲突。每个索引上的节点dictEntry都有一个next字段，可以指向下一个节点。并且由于不是双向链表，插入该节点是头插法<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">dictEntry *entry;</span><br><span class="line">entry = zmalloc(<span class="keyword">sizeof</span>(*entry));</span><br><span class="line">entry-&gt;key = key;</span><br><span class="line">entry-&gt;next = *bucket;</span><br><span class="line">*bucket = entry;</span><br><span class="line">d-&gt;ht_used[htidx]++;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>rehash</p>
+<ul>
+<li></li>
+</ul>
+</li>
+</ul>
+<h3 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h3><ul>
+<li>容器型数据结构的通用规则<ul>
+<li>create if not exist</li>
+<li>drop if no elements</li>
+</ul>
+</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://github.com/redis/redis/tree/8.0">Redis 8.0</a></p>
+<p><a href="https://redis.io/docs/latest/develop/data-types/">Understand Redis data types</a></p>
+<p>《Redis设计与实现》</p>
+]]></content>
+      <tags>
+        <tag>Redis</tag>
+        <tag>对象</tag>
+        <tag>数据类型</tag>
+      </tags>
+  </entry>
 </search>
