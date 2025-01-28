@@ -43,6 +43,36 @@
       </tags>
   </entry>
   <entry>
+    <title>Gnutls源码安装小记</title>
+    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
+<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>nettlex.so not found</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
+<li><p><code>libev4 was not found.</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <categories>
+        <category>实验记录</category>
+      </categories>
+      <tags>
+        <tag>Gnutls</tag>
+        <tag>SSL</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>StrongSwan部署小记</title>
     <url>/2024/08/20/StrongSwan%E9%83%A8%E7%BD%B2%E5%B0%8F%E8%AE%B0/</url>
     <content><![CDATA[<h1 id="虚拟机搭建strongswan"><a href="#虚拟机搭建strongswan" class="headerlink" title="虚拟机搭建strongswan"></a>虚拟机搭建strongswan</h1><p>注：仅作测试用，故服务端和客户端分别安装在了同一网段下的两台Ubuntu上。</p>
@@ -130,100 +160,10 @@
       </tags>
   </entry>
   <entry>
-    <title>Gnutls源码安装小记</title>
-    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-
-<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
-<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>nettlex.so not found</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
-<li><p><code>libev4 was not found.</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
-</ol>
-]]></content>
-      <categories>
-        <category>实验记录</category>
-      </categories>
-      <tags>
-        <tag>Gnutls</tag>
-        <tag>SSL</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Welcome</title>
     <url>/2024/05/23/Welcome/</url>
     <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
 ]]></content>
-  </entry>
-  <entry>
-    <title>《MySQL是怎样运行的》（三）</title>
-    <url>/2024/08/14/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%B8%89%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
-<li><p>常用的数据结构 - B+树</p>
-<ol>
-<li>高度平衡：所有叶子节点处于同一层</li>
-<li>叶子节点存储索引列和主键值（或索引列和完整数据记录），由双向链表构成</li>
-<li>除了叶子节点外，每个节点可以有多个子节点</li>
-</ol>
-</li>
-<li><p>常见的索引类型</p>
-<ul>
-<li>按叶子节点存放的数据分类：聚簇索引（叶子节点存放完整的数据记录，通常主键作为排序条件）和二级索引（需要回表查询完整的数据记录，通常非主键列作为排序条件）</li>
-<li>覆盖索引：需要查询的内容包含在索引列中</li>
-<li>联合索引：也称复合索引、组合索引，该类型的索引包含了多个数据列，本质也是一个二级索引</li>
-</ul>
-</li>
-<li><p>MyISAM引擎的细节和上述（InnoDB引擎）不完全一样。其将索引和数据分开存储。</p>
-<blockquote>
-<p>所有数据都存放在数据文件中，索引树存放对应的行号，根据行号查找对应的数据记录</p>
-</blockquote>
-</li>
-</ul>
-<h2 id="索引的构建及使用"><a href="#索引的构建及使用" class="headerlink" title="索引的构建及使用"></a>索引的构建及使用</h2><ul>
-<li>InnoDB默认为主键构建一个聚簇索引，叶子节点包含完整的数据记录</li>
-<li>用户可以为非主键构建二级索引，该B+树的非叶子节点存放索引列的值、主键值以及对应下一层索引页的页号，叶子节点存放索引列的值和主键值，需要根据主键值再去聚簇索引查找完整的数据记录，因此被称为二级索引</li>
-<li>索引在逻辑层面上是B+树，在物理层面上是以页的形式存放，每一页都是同一层的节点，且页与页之间有双向指针相连。页内按照索引列的值大小排成单向链表。</li>
-<li>索引页的布局与数据页类似，每一页都分成七个部分，其中数据部分分成若干组，每组中主键大的记录的偏移量会被存储在页目录中的槽中。</li>
-<li>进行检索时，每条索引指向与其值相等的第一条记录所在的位置。</li>
-</ul>
-<h2 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h2><h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ol>
-<li>提高查找效率</li>
-<li>如果查找的结果需要按照索引条件分组或者排列，也能减少时间开支</li>
-</ol>
-<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ol>
-<li>维护索引需要额外的时间，比如插入数据导致的页面分裂，删除数据导致的索引重新排列等。</li>
-<li>使用索引也需要时间。每次执行查询语句之前，都需要计算不同的索引所需的时间成本，生成一个执行计划。如果索引过多，就有可能导致这个生成执行计划的时间过长。</li>
-<li>建立索引需要占用额外的空间。每创建一个索引就是构建一个新的二叉树，二叉树的节点需要占据空间。</li>
-</ol>
-<h2 id="如何创建合适的索引"><a href="#如何创建合适的索引" class="headerlink" title="如何创建合适的索引"></a>如何创建合适的索引</h2><ul>
-<li><code>为常用作搜索条件的列创建索引</code>  为常出现在WHERE、ORDER BY、GROUP BY子句中的列创建索引，仅出现在查询列表中的列就不必要创建索引</li>
-<li><code>不为含有太多重复值的列创建索引</code>  如果某列中重复的数值很多，该列就不适合作为快速搜索的条件，因此不必要创建索引</li>
-<li><code>索引列的数据类型占用空间尽可能小</code>  为某列创建索引，索引树的节点中就都存放有该列的值，如果值的类型占用的存储空间太大，就会产生不必要的空间消耗。例如使用INT类型就足够表示，就不必要使用BIGINT类型。</li>
-<li><code>为列前缀创建索引</code>  可以将字符串中的前几个字符存放到索引中。</li>
-<li><code>创建覆盖索引</code>  常出现在查询列表中的列可以创建覆盖索引，这样B+树中的叶子节点就有需要的结果，不需要回表查询，减少时间开销。</li>
-<li><code>不要在搜索条件中进行索引列的运算</code>  例如以key列创建了索引，如果WHERE子句中的搜索条件是WHERE key * 2 &lt; 4，那么MySQL将使用全表扫描而不使用索引。</li>
-<li><code>表的主键设置为自动递增</code>  MySQL默认为表格的主键列创建聚簇索引，如果主键不是递增的，那么插入新记录时就有可能导致正好插入到已满的数据页的中间，此时MySQL需要进行页面分裂，并把一些数据移动到新的页面中，造成无谓的性能损耗。</li>
-<li><code>不要创建冗余和重复索引</code>  例如本身已经创建了一个针对key1\key2的联合索引，就不需要单独再为key1创建索引了</li>
-</ul>
-]]></content>
-      <categories>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
-        <tag>索引</tag>
-      </tags>
   </entry>
   <entry>
     <title>《MySQL是怎样运行的》(一)</title>
@@ -650,6 +590,66 @@
       </tags>
   </entry>
   <entry>
+    <title>《MySQL是怎样运行的》（三）</title>
+    <url>/2024/08/14/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%B8%89%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li><p>常用的数据结构 - B+树</p>
+<ol>
+<li>高度平衡：所有叶子节点处于同一层</li>
+<li>叶子节点存储索引列和主键值（或索引列和完整数据记录），由双向链表构成</li>
+<li>除了叶子节点外，每个节点可以有多个子节点</li>
+</ol>
+</li>
+<li><p>常见的索引类型</p>
+<ul>
+<li>按叶子节点存放的数据分类：聚簇索引（叶子节点存放完整的数据记录，通常主键作为排序条件）和二级索引（需要回表查询完整的数据记录，通常非主键列作为排序条件）</li>
+<li>覆盖索引：需要查询的内容包含在索引列中</li>
+<li>联合索引：也称复合索引、组合索引，该类型的索引包含了多个数据列，本质也是一个二级索引</li>
+</ul>
+</li>
+<li><p>MyISAM引擎的细节和上述（InnoDB引擎）不完全一样。其将索引和数据分开存储。</p>
+<blockquote>
+<p>所有数据都存放在数据文件中，索引树存放对应的行号，根据行号查找对应的数据记录</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="索引的构建及使用"><a href="#索引的构建及使用" class="headerlink" title="索引的构建及使用"></a>索引的构建及使用</h2><ul>
+<li>InnoDB默认为主键构建一个聚簇索引，叶子节点包含完整的数据记录</li>
+<li>用户可以为非主键构建二级索引，该B+树的非叶子节点存放索引列的值、主键值以及对应下一层索引页的页号，叶子节点存放索引列的值和主键值，需要根据主键值再去聚簇索引查找完整的数据记录，因此被称为二级索引</li>
+<li>索引在逻辑层面上是B+树，在物理层面上是以页的形式存放，每一页都是同一层的节点，且页与页之间有双向指针相连。页内按照索引列的值大小排成单向链表。</li>
+<li>索引页的布局与数据页类似，每一页都分成七个部分，其中数据部分分成若干组，每组中主键大的记录的偏移量会被存储在页目录中的槽中。</li>
+<li>进行检索时，每条索引指向与其值相等的第一条记录所在的位置。</li>
+</ul>
+<h2 id="索引的优缺点"><a href="#索引的优缺点" class="headerlink" title="索引的优缺点"></a>索引的优缺点</h2><h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ol>
+<li>提高查找效率</li>
+<li>如果查找的结果需要按照索引条件分组或者排列，也能减少时间开支</li>
+</ol>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ol>
+<li>维护索引需要额外的时间，比如插入数据导致的页面分裂，删除数据导致的索引重新排列等。</li>
+<li>使用索引也需要时间。每次执行查询语句之前，都需要计算不同的索引所需的时间成本，生成一个执行计划。如果索引过多，就有可能导致这个生成执行计划的时间过长。</li>
+<li>建立索引需要占用额外的空间。每创建一个索引就是构建一个新的二叉树，二叉树的节点需要占据空间。</li>
+</ol>
+<h2 id="如何创建合适的索引"><a href="#如何创建合适的索引" class="headerlink" title="如何创建合适的索引"></a>如何创建合适的索引</h2><ul>
+<li><code>为常用作搜索条件的列创建索引</code>  为常出现在WHERE、ORDER BY、GROUP BY子句中的列创建索引，仅出现在查询列表中的列就不必要创建索引</li>
+<li><code>不为含有太多重复值的列创建索引</code>  如果某列中重复的数值很多，该列就不适合作为快速搜索的条件，因此不必要创建索引</li>
+<li><code>索引列的数据类型占用空间尽可能小</code>  为某列创建索引，索引树的节点中就都存放有该列的值，如果值的类型占用的存储空间太大，就会产生不必要的空间消耗。例如使用INT类型就足够表示，就不必要使用BIGINT类型。</li>
+<li><code>为列前缀创建索引</code>  可以将字符串中的前几个字符存放到索引中。</li>
+<li><code>创建覆盖索引</code>  常出现在查询列表中的列可以创建覆盖索引，这样B+树中的叶子节点就有需要的结果，不需要回表查询，减少时间开销。</li>
+<li><code>不要在搜索条件中进行索引列的运算</code>  例如以key列创建了索引，如果WHERE子句中的搜索条件是WHERE key * 2 &lt; 4，那么MySQL将使用全表扫描而不使用索引。</li>
+<li><code>表的主键设置为自动递增</code>  MySQL默认为表格的主键列创建聚簇索引，如果主键不是递增的，那么插入新记录时就有可能导致正好插入到已满的数据页的中间，此时MySQL需要进行页面分裂，并把一些数据移动到新的页面中，造成无谓的性能损耗。</li>
+<li><code>不要创建冗余和重复索引</code>  例如本身已经创建了一个针对key1\key2的联合索引，就不需要单独再为key1创建索引了</li>
+</ul>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+        <tag>索引</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>《MySQL是怎样运行的》（五）</title>
     <url>/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/</url>
     <content><![CDATA[<h1 id="InnoDB的表空间"><a href="#InnoDB的表空间" class="headerlink" title="InnoDB的表空间"></a>InnoDB的表空间</h1><h2 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h2><ul>
@@ -826,6 +826,88 @@
       </tags>
   </entry>
   <entry>
+    <title>搭建个人博客(Hexo + Github)</title>
+    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
+<span id="more"></span>
+
+<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
+<li>安装node.js</li>
+<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
+<li>安装博客网站的框架Hexo<ul>
+<li>在Github新建一个仓库</li>
+<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
+<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
+<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
+<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
+本地部署完成</li>
+</ul>
+</li>
+<li>将Hexo部署到Github<ul>
+<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
+<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
+<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
+<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
+部署成功</li>
+</ul>
+</li>
+<li>绑定域名<ul>
+<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
+<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
+<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
+<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
+<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
+<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
+<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
+</ul>
+</li>
+</ul>
+<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
+<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
+<li>以Cactus主题为例<ul>
+<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
+<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
+<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
+<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
+<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
+<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
+<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
+<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>博客</category>
+      </categories>
+      <tags>
+        <tag>blog</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>《MySQL是怎样运行的》（四）</title>
     <url>/2024/09/06/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E5%9B%9B%EF%BC%89/</url>
     <content><![CDATA[<h1 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h1><h2 id="单表查询"><a href="#单表查询" class="headerlink" title="单表查询"></a>单表查询</h2><h3 id="访问方法"><a href="#访问方法" class="headerlink" title="访问方法"></a>访问方法</h3><ol>
@@ -938,88 +1020,6 @@
         <tag>MySQL</tag>
         <tag>数据库</tag>
         <tag>查询</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>搭建个人博客(Hexo + Github)</title>
-    <url>/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<p>参考<br><a href="https://cloud.tencent.com/developer/article/2337246">使用Hexo从0到1搭建个人博客详细教程（超详细，超简单）</a><br><a href="https://zhuanlan.zhihu.com/p/102592286">从零开始搭建个人博客（超详细）</a><br><a href="https://goldstine.github.io/create_blog_with_github_pages/">可能是最全面的github pages搭建个人博客教程</a></p>
-<span id="more"></span>
-
-<h1 id="部署到Github"><a href="#部署到Github" class="headerlink" title="部署到Github"></a>部署到Github</h1><ul>
-<li>安装node.js</li>
-<li>配置npm安装的默认目录，并安装webpack<!-- ![](/_posts/搭建个人博客/image1.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image1.png" class="" title="image1"></li>
-<li>安装博客网站的框架Hexo<ul>
-<li>在Github新建一个仓库</li>
-<li>本地新建一个Blog文件夹，在该目录下打开Git Bash，输入npm命令安装Hexo<!-- ![](/source/_posts/搭建个人博客/image2.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image2.png" class="" title="image2"></li>
-<li>初始化博客<!-- ![](/source/_posts/搭建个人博客/image3.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image3.png" class="" title="image3"></li>
-<li>静态部署<!-- ![](/source/_posts/搭建个人博客/image4.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image4.png" class="" title="image4"></li>
-<li>启动服务器<!-- ![](/source/_posts/搭建个人博客/image5.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image5.png" class="" title="image5"></li>
-<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image6.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image6.png" class="" title="image6">
-本地部署完成</li>
-</ul>
-</li>
-<li>将Hexo部署到Github<ul>
-<li>在Blog文件夹下找到_config.yml并打开，在文件末尾追加<!-- ![](/source/_posts/搭建个人博客/image7.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image7.png" class="" title="image7"></li>
-<li>还是在Blog文件夹下打开Git Bash，安装git部署插件<!-- ![](/source/_posts/搭建个人博客/image8.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image8.png" class="" title="image8"></li>
-<li>清理缓存并重新部署<!-- ![](/source/_posts/搭建个人博客/image9.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image9.png" class="" title="image9"></li>
-<li>浏览器访问<!-- ![](/source/_posts/搭建个人博客/image11.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image11.png" class="" title="image11">
-部署成功</li>
-</ul>
-</li>
-<li>绑定域名<ul>
-<li>从阿里云购买一个域名，在域名控制台点击“解析”<!-- ![](/source/_posts/搭建个人博客/image12.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image12.png" class="" title="image12"></li>
-<li>添加两条记录，其中第一条记录值可以ping 仓库名得到<!-- ![](/source/_posts/搭建个人博客/image18.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image18.png" class="" title="image18">
-<!-- ![](/source/_posts/搭建个人博客/image19.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image19.png" class="" title="image19"></li>
-<li>在Blog\source下新建一个CNAME文件，写入购买的域名<!-- ![](/source/_posts/搭建个人博客/image14.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image14.png" class="" title="image14"></li>
-<li>还是在Blog文件夹下，打开Git Bash，依次执行以下代码<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
-<li>查看repo的setting-&gt;Pages,Custom domain已经配置好了<!-- ![](/source/_posts/搭建个人博客/image15.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image15.png" class="" title="image15">
-<!-- ![](/source/_posts/搭建个人博客/image16.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image16.png" class="" title="image16"></li>
-<li>直接访问该域名<!-- ![](/source/_posts/搭建个人博客/image17.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image17.png" class="" title="image17"></li>
-</ul>
-</li>
-</ul>
-<h1 id="部署到云服务器"><a href="#部署到云服务器" class="headerlink" title="部署到云服务器"></a>部署到云服务器</h1><p>可参考 <a href="https://cloud.tencent.com/developer/article/1662792">Hexo进阶教程（四）| 部署Hexo到自己的服务器</a></p>
-<h1 id="选择主题"><a href="#选择主题" class="headerlink" title="选择主题"></a>选择主题</h1><ul>
-<li>以Cactus主题为例<ul>
-<li><a href="https://github.com/probberechts/hexo-theme-cactus?tab=readme-ov-file#install">Cactus官方使用文档</a></li>
-<li>在Blog目录下打开Git Bash，执行git clone<!-- ![](/source/_posts/搭建个人博客/image22.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image22.png" class="" title="image22"></li>
-<li>修改_config.yml<!-- ![](/source/_posts/搭建个人博客/image23.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image23.png" class="" title="image23"></li>
-<li>进入&#x2F;theme&#x2F;cactus文件夹下，修改_config.yml,选择自己喜欢的scheme<!-- ![](/source/_posts/搭建个人博客/image25.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image25.png" class="" title="image25"></li>
-<li>重新启动hexo<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo d</span><br></pre></td></tr></table></figure></li>
-<li>博客页面的主题已经被成功切换<!-- ![](/source/_posts/搭建个人博客/image26.png) -->
-<img src="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/image26.png" class="" title="image26"></li>
-<li>优化主题可参考<a href="https://zhuanlan.zhihu.com/p/106060640">个人博客第8篇——优化主题（持续更新）</a></li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>博客</category>
-      </categories>
-      <tags>
-        <tag>blog</tag>
-        <tag>Hexo</tag>
       </tags>
   </entry>
   <entry>
@@ -1181,22 +1181,26 @@
   <entry>
     <title>浅谈Redis对象和数据类型</title>
     <url>/2025/01/11/%E6%B5%85%E8%B0%88Redis%E5%AF%B9%E8%B1%A1%E5%92%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/</url>
-    <content><![CDATA[<h1 id="浅谈Redis对象和数据类型"><a href="#浅谈Redis对象和数据类型" class="headerlink" title="浅谈Redis对象和数据类型"></a>浅谈Redis对象和数据类型</h1><h2 id="Redis对象"><a href="#Redis对象" class="headerlink" title="Redis对象"></a>Redis对象</h2><p><code>下文中的redis源码选自</code><a href="https://github.com/redis/redis/tree/8.0">redis8.0</a></p>
+    <content><![CDATA[<h1 id="浅谈Redis对象和数据类型"><a href="#浅谈Redis对象和数据类型" class="headerlink" title="浅谈Redis对象和数据类型"></a>浅谈Redis对象和数据类型</h1><h2 id="Redis对象"><a href="#Redis对象" class="headerlink" title="Redis对象"></a>Redis对象</h2><p><code>下文中的redis源码选自</code><a href="https://github.com/redis/redis/tree/7.4">Redis7.4</a></p>
 <ol>
 <li><p>Redis定义了多种数据类型（SDS, linkedlist, dict(也叫hashtable), skiplist, intset, ziplist）和多种对象类型（String, List, Hash, Set, Sortedset），其中每种对象类型的底层至少对应一种数据类型</p>
 </li>
-<li><p>String - 简单动态字符串（SDS），预分配空间来减少内存的频繁分配；容量小于1M之前，扩容都是翻倍，超过1M之后，每次只增加1M；最大长度为512M</p>
+<li><p>String </p>
+<ul>
+<li>int - 保存整数值并且该整数值的范围在long内</li>
+<li>简单动态字符串（SDS），预分配空间来减少内存的频繁分配；容量小于1M之前，扩容都是翻倍，超过1M之后，每次只增加1M；最大长度为512M</li>
+</ul>
 </li>
 <li><p>List </p>
 <ul>
-<li>元素数量较少且元素大小较小时，底层是ziplist</li>
-<li>元素数量较多时，底层是quicklist(linkedlist + ziplist)</li>
+<li>默认底层是quicklist(linkedlist + listpack)</li>
+<li>特殊情况下是linkedlist</li>
 </ul>
 </li>
 <li><p>Hash</p>
 <ul>
 <li>ziplist：键值对数量少并且每个键值对的字符串长度小</li>
-<li>dict(hashtable) : 数组 + 链表</li>
+<li>dict(hashtable &#x2F; compact hashtable) : 数组 + 链表</li>
 <li>渐进式rehash</li>
 </ul>
 </li>
@@ -1210,16 +1214,15 @@
 <li><p>Sortedset - 容器型</p>
 <ul>
 <li>有序(默认升序)， value:score</li>
-<li>ziplist(元素数量少128且所有元素成员长度小64)</li>
 <li>zset: skiplist + dict</li>
 </ul>
 </li>
 </ol>
-<h2 id="Redis数据结构"><a href="#Redis数据结构" class="headerlink" title="Redis数据结构"></a>Redis数据结构</h2><h4 id="SDS"><a href="#SDS" class="headerlink" title="SDS"></a>SDS</h4><ul>
+<h3 id="Redis数据结构"><a href="#Redis数据结构" class="headerlink" title="Redis数据结构"></a>Redis数据结构</h3><h4 id="SDS"><a href="#SDS" class="headerlink" title="SDS"></a>SDS</h4><ul>
 <li><p>在Redis中，可能会被修改的字符串类型都用它自定义的一个结构SDS来描述，只有一定不会更改的字面量才会使用C字符串</p>
 </li>
 <li><p>SDS(simple dynamic string,简单动态字符串)的定义包括当前字符串长度、已分配的空间大小、标志位以及字符串本身</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// src/sds.h</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> __<span class="title">attribute__</span> ((__<span class="title">packed__</span>)) <span class="title">sdshdr16</span> &#123;</span></span><br><span class="line">  <span class="type">uint16_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">  <span class="type">uint16_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">  <span class="type">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// src/sds.h</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> __<span class="title">attribute__</span> ((__<span class="title">packed__</span>)) <span class="title">sdshdr16</span> &#123;</span></span><br><span class="line">  <span class="type">uint16_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">  <span class="type">uint16_t</span> alloc; <span class="comment">/* excluding the header and null terminat or */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">  <span class="type">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>SDS的优点（相比于C字符串）</p>
 <ul>
@@ -1236,10 +1239,19 @@
 </ul>
 </li>
 </ul>
-<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h3 id="Dict-HashTable"><a href="#Dict-HashTable" class="headerlink" title="Dict(HashTable)"></a>Dict(HashTable)</h3><ul>
+<h4 id="Linkedlist"><a href="#Linkedlist" class="headerlink" title="Linkedlist"></a>Linkedlist</h4><ul>
+<li>链表的底层是Linkedlist，该类型的数据结构是一个双向链表。<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// src/adlist.h</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">listNode</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">listNode</span> *<span class="title">prev</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">listNode</span> *<span class="title">next</span>;</span></span><br><span class="line">  <span class="type">void</span> *value;</span><br><span class="line">&#125; listNode;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">list</span> &#123;</span></span><br><span class="line">  listNode *head;</span><br><span class="line">  listNode *tail;</span><br><span class="line">  <span class="type">void</span> *(*dup)(<span class="type">void</span> *ptr);</span><br><span class="line">  <span class="type">void</span> (*<span class="built_in">free</span>)(<span class="type">void</span> *ptr);</span><br><span class="line">  <span class="type">int</span> (*match)(<span class="type">void</span> *ptr, <span class="type">void</span> *key);</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">long</span> len;</span><br><span class="line">&#125; <span class="built_in">list</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>链表节点包含该节点的值、prev指针和next指针。</li>
+<li>链表结构包含指向头节点和尾节点的指针、链表长度、复制链表的函数、释放链表节点的函数以及匹配节点的函数</li>
+</ul>
+</li>
+</ul>
+<h4 id="Dict-HashTable"><a href="#Dict-HashTable" class="headerlink" title="Dict(HashTable)"></a>Dict(HashTable)</h4><ul>
 <li><p>Hash的底层数据结构是哈希表。存储键值对时，会先根据键计算哈希值(siphash)和索引，然后将值存放到哈希表中对应索引处。</p>
 <ul>
-<li>计算哈希值: <figure class="highlight c"><table><tr><td class="code"><pre><span class="line">hash = dictHashKey(d, key, d-&gt;useStoredKeyApi);</span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">uint64_t</span> <span class="title function_">dictHashKey</span><span class="params">(dict *d, <span class="type">const</span> <span class="type">void</span> *key, <span class="type">int</span> isStoredKey)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (isStoredKey &amp;&amp; d-&gt;type-&gt;storedHashFunction)</span><br><span class="line">    <span class="keyword">return</span> d-&gt;type-&gt;storedHashFunction(key);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="keyword">return</span> d-&gt;type-&gt;hashFunction(key);</span><br><span class="line">    <span class="comment">// d-&gt;type-&gt;hashFunction默认指向dictGenHashFunction</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>计算哈希值: <figure class="highlight c"><table><tr><td class="code"><pre><span class="line">hash = dictHashKey(d, key, d-&gt;useStoredKeyApi);</span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">uint64_t</span> <span class="title function_">dictHashKey</span><span class="params">(dict *d, <span class="type">const</span> <span class="type">void</span> *key, <span class="type">int</span> isStoredKey)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (isStoredKey &amp;&amp; d-&gt;type-&gt;storedHashFunction)</span><br><span class="line">    <span class="keyword">return</span> d-&gt;type-&gt;storedHashFunction(key);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="keyword">return</span> d-&gt;type-&gt;hashFunction(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 <li>计算索引： <code>idx = hash &amp; DICTHT_SIZE_MASK(d-&gt;ht_size_exp[0]);</code></li>
 </ul>
 </li>
@@ -1259,22 +1271,102 @@
 <li>通过链表来解决冲突。每个索引上的节点dictEntry都有一个next字段，可以指向下一个节点。并且由于不是双向链表，插入该节点是头插法<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">dictEntry *entry;</span><br><span class="line">entry = zmalloc(<span class="keyword">sizeof</span>(*entry));</span><br><span class="line">entry-&gt;key = key;</span><br><span class="line">entry-&gt;next = *bucket;</span><br><span class="line">*bucket = entry;</span><br><span class="line">d-&gt;ht_used[htidx]++;</span><br></pre></td></tr></table></figure></li>
 </ul>
 </li>
-<li><p>rehash</p>
+<li><p>渐进式rehash - 当哈希表的负载因子超出合适的范围时，需要对哈希表进行扩容或者缩容</p>
 <ul>
-<li></li>
+<li>根据需要给ht[1]分配合适的大小（扩容，则分配第一个大于等于ht[0].used * 2的2的次方幂；缩容，则分配第一个大于等于ht[0].used的2的次方幂）、</li>
+<li>重新计算ht[0]中每个键的哈希和索引，将其键值对放到ht[1]上（在此过程中，对该哈希表的增只对ht[1]进行操作，删改查则需要对ht[0]和ht[1]都进行操作）</li>
+<li>迁移完后，ht[0]变为ht[1],ht[1]变为ht[0]</li>
 </ul>
 </li>
 </ul>
-<h3 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h3><ul>
-<li>容器型数据结构的通用规则<ul>
-<li>create if not exist</li>
-<li>drop if no elements</li>
+<h4 id="skiplist"><a href="#skiplist" class="headerlink" title="skiplist"></a>skiplist</h4><ul>
+<li><p>skiplist是有序集合SortedSet选择zset作为编码时的底层实现，可以理解为多层链表。最高层的节点最少，最低层包含所有节点。</p>
+</li>
+<li><p>skiplist相关的源码如下</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// src/server.h</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> &#123;</span></span><br><span class="line">  sds ele; <span class="comment">// 具体数据</span></span><br><span class="line">  <span class="type">double</span> score; <span class="comment">// 分数</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> *<span class="title">backward</span>;</span></span><br><span class="line">  <span class="comment">// 层级数组</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">zskiplistLevel</span> &#123;</span></span><br><span class="line">      <span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> *<span class="title">forward</span>;</span></span><br><span class="line">      <span class="type">unsigned</span> <span class="type">long</span> span; <span class="comment">// 跨度</span></span><br><span class="line">  &#125; level[];</span><br><span class="line">&#125; zskiplistNode;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zskiplist</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> *<span class="title">header</span>, *<span class="title">tail</span>;</span> <span class="comment">// 头结点和尾节点</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">long</span> length; <span class="comment">// 节点数量</span></span><br><span class="line">  <span class="type">int</span> level; <span class="comment">// 层数</span></span><br><span class="line">&#125; zskiplist;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zset</span> &#123;</span></span><br><span class="line">  dict *dict;</span><br><span class="line">  zskiplist *zsl;</span><br><span class="line">&#125; zset;</span><br><span class="line"><span class="comment">// zset相关的api操作在 src/t_zset.c</span></span><br><span class="line"><span class="comment">// 比较重要的有zslCreate、zslFree、zslGetRank</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>通过建立索引来提高查找元素的效率，即空间换时间</p>
+</li>
+<li><p>zsl</p>
+<ul>
+<li>在同一个跳跃表中，各个节点保存的成员对象必须是唯一的，但是多个节点保存的分值可以相同，分值相同节点会按照成员对象在字典序中的大小来进行排序，较小的靠前。</li>
+<li>插入节点时，该节点的层数通过<code>zslRandomLevel</code>获取</li>
 </ul>
 </li>
 </ul>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://github.com/redis/redis/tree/8.0">Redis 8.0</a></p>
-<p><a href="https://redis.io/docs/latest/develop/data-types/">Understand Redis data types</a></p>
-<p>《Redis设计与实现》</p>
+<h4 id="ziplist（Redis7-0后被listpack替代）"><a href="#ziplist（Redis7-0后被listpack替代）" class="headerlink" title="ziplist（Redis7.0后被listpack替代）"></a>ziplist（Redis7.0后被listpack替代）</h4><ul>
+<li><p>ziplist早期是列表List的底层实现之一，当列表键只包含少量列表项，并且每个列表项是小整数或者是短字符串的时候，Redis就会使用ziplist作为底层实现</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// src/ziplist.h 7.4版本已经优化了，优化后如下</span></span><br><span class="line"><span class="comment">/* Each entry in the ziplist is either a string or an integer. */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="comment">/* When string is used, it is provided with the length (slen). */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> *sval;</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> slen;</span><br><span class="line">  <span class="comment">/* When integer is used, &#x27;sval&#x27; is NULL, and lval holds the value. */</span></span><br><span class="line">  <span class="type">long</span> <span class="type">long</span> lval;</span><br><span class="line">&#125; ziplistEntry;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 5.0版本</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zlentry</span> &#123;</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> prevrawlensize; <span class="comment">/* Bytes used to encode the previous entry len*/</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> prevrawlen;     <span class="comment">/* Previous entry len. */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> lensize;        <span class="comment">/* Bytes used to encode this entry type/len.</span></span><br><span class="line"><span class="comment">                                  For example strings have a 1, 2 or 5 bytes</span></span><br><span class="line"><span class="comment">                                  header. Integers always use a single byte.*/</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> len;            <span class="comment">/* Bytes used to represent the actual entry.</span></span><br><span class="line"><span class="comment">                                  For strings this is just the string length</span></span><br><span class="line"><span class="comment">                                  while for integers it is 1, 2, 3, 4, 8 or</span></span><br><span class="line"><span class="comment">                                  0 (for 4 bit immediate) depending on the</span></span><br><span class="line"><span class="comment">                                  number range. */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> headersize;     <span class="comment">/* prevrawlensize + lensize. */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> encoding;      <span class="comment">/* Set to ZIP_STR_* or ZIP_INT_* depending on</span></span><br><span class="line"><span class="comment">                                  the entry encoding. However for 4 bits</span></span><br><span class="line"><span class="comment">                                  immediate integers this can assume a range</span></span><br><span class="line"><span class="comment">                                  of values and must be range-checked. */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> *p;            <span class="comment">/* Pointer to the very start of the entry, that</span></span><br><span class="line"><span class="comment">                                  is, this points to prev-entry-len field. */</span></span><br><span class="line">&#125; zlentry;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ziplist是一个连续的数组，其结构如下</p>
+<table>
+<thead>
+<tr>
+<th align="center">zlbytes</th>
+<th align="center">zltail</th>
+<th align="center">zllen</th>
+<th align="center">entry1</th>
+<th align="center">entry2</th>
+<th align="center">…</th>
+<th align="center">zlend</th>
+</tr>
+</thead>
+</table>
+<ul>
+<li>zlbytes - 4字节，记录整个ziplist占用的字节数</li>
+<li>zltail - 4字节，记录最后一个entry的偏移</li>
+<li>zllen - 2字节，记录entry个数</li>
+<li>entry - 存储具体的数据</li>
+<li>zlend（0xFF） - 1字节，标记ziplist的结束</li>
+</ul>
+</li>
+<li><p>缺陷 - 连锁更新</p>
+<ul>
+<li>由于早期entry保存了prevlen（如果前一个entry小于254字节，则使用1字节记录prevlen；否则用5个字节记录prevlen）</li>
+<li>假设entry1\entry2\…\entryn都是253字节，修改entry1后它变成了254字节，那么后续所有的entry都需要更改</li>
+</ul>
+</li>
+<li><p>改进 - listpack（Redis7.0版本后用listpack代替了ziplist）</p>
+</li>
+</ul>
+<h4 id="intset"><a href="#intset" class="headerlink" title="intset"></a>intset</h4><ul>
+<li><p>intset是集合Set的底层实现之一，其特点是有序且不重复，相关源码如下</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">intset</span> &#123;</span></span><br><span class="line">  <span class="type">uint32_t</span> encoding; <span class="comment">// encoding的值为INTSET_ENC_INT16或者INTSET_ENC_INT32或者INTSET_ENC_INT64</span></span><br><span class="line">  <span class="type">uint32_t</span> length;</span><br><span class="line">  <span class="type">int8_t</span> contents[];</span><br><span class="line">&#125; intset;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>当需要新插入一个元素，并且该元素的类型比当前集合中所有元素的类型都大时，需要先将整个集合升级，把原来的元素移动到合适的位置后（逆序移动），再插入新的元素</p>
+<ul>
+<li>升级的优点：避免类型错误（不把不同的元素类型放在同一个数组中）；在需要的时候再升级，节约了内存</li>
+<li>升级后不能降级</li>
+</ul>
+</li>
+</ul>
+<h4 id="listpack"><a href="#listpack" class="headerlink" title="listpack"></a>listpack</h4><ul>
+<li><p>listpack取代了ziplist，作为list的底层实现之一。源码如下</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="comment">/* When string is used, it is provided with the length (slen). */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> *sval;</span><br><span class="line">  <span class="type">uint32_t</span> slen;</span><br><span class="line">  <span class="comment">/* When integer is used, &#x27;sval&#x27; is NULL, and lval holds the value. */</span></span><br><span class="line">  <span class="type">long</span> <span class="type">long</span> lval;</span><br><span class="line">&#125; listpackEntry;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>listpack的内存布局如下<br>| totalBytes | numElements | element1 | element2 | … | listEnd |<br>| :—: | :—: | :—: | :—: | :—: | :—: | :—: |</p>
+<ul>
+<li><p>totaltbytes - 4字节，表示listpack总长度</p>
+</li>
+<li><p>numElements - 2字节，表示当前元素数量</p>
+</li>
+<li><p>listEnd（0xFF） - 1字节，标识当前listpack结束</p>
+</li>
+<li><p>element的结构如下<br>| encode-type | data | element-len |<br>| :—: | :—: | :—：|</p>
+<ul>
+<li>encodetype - 编码方案</li>
+<li>data - 具体数据</li>
+<li>element-len - 前两个条目占用的字节数，主要用于从右往左遍历</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://redis.io/docs/latest/develop/data-types/">Understand Redis data types</a></p>
+<p><a href="https://blog.csdn.net/qq_36581961/article/details/112145752">redis源码阅读—zskiplist 跳跃表</a></p>
+<p><a href="https://developer.aliyun.com/article/1418536">redis7.0源码阅读（五）：跳表（skiplist）</a></p>
+<p><a href="https://blog.csdn.net/sihai12345/article/details/138419109">Skip List–跳表（全网最详细的跳表文章没有之一）</a></p>
+<p><a href="https://segmentfault.com/a/1190000041670843">Redis7代码分析阅读总结一：listpack</a></p>
 ]]></content>
       <tags>
         <tag>Redis</tag>
