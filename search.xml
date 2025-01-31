@@ -1361,16 +1361,7 @@
 <li>totaltbytes - 4字节，表示listpack总长度</li>
 <li>numElements - 2字节，表示当前元素数量</li>
 <li>listEnd（0xFF） - 1字节，标识当前listpack结束</li>
-<li>element的结构如下<table>
-<thead>
-<tr>
-<th align="center">encode-type</th>
-<th align="center">data</th>
-<th align="center">element-len</th>
-</tr>
-</thead>
-</table>
-<ul>
+<li>element的结构如下(encode-type + data + element-len)<ul>
 <li>encodetype - 编码方案</li>
 <li>data - 具体数据</li>
 <li>element-len - 前两个条目占用的字节数，主要用于从右往左遍历</li>
