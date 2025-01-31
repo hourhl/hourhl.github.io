@@ -1,6 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Gnutls源码安装小记</title>
+    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
+<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>nettlex.so not found</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
+<li><p><code>libev4 was not found.</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <categories>
+        <category>实验记录</category>
+      </categories>
+      <tags>
+        <tag>Gnutls</tag>
+        <tag>SSL</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>AFL++的安装和基本使用</title>
     <url>/2024/09/07/AFL-%E7%9A%84%E5%AE%89%E8%A3%85%E5%92%8C%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h1 id="AFL"><a href="#AFL" class="headerlink" title="AFL++"></a>AFL++</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>AFL++是在AFL基础上进行改进的模糊测试工具，其<a href="https://github.com/AFLplusplus/AFLplusplus">源码</a>可以从github上得到。AFL++会将测试用例进行变异并作为输入交给目标程序，当这个测试用例能够触发新的路径时，就会被保存并进一步变异测试。</p>
@@ -43,34 +73,10 @@
       </tags>
   </entry>
   <entry>
-    <title>Gnutls源码安装小记</title>
-    <url>/2024/08/20/Gnutls%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85%E5%B0%8F%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="源码安装Gnutls"><a href="#源码安装Gnutls" class="headerlink" title="源码安装Gnutls"></a>源码安装Gnutls</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><p>根据Gnutls仓库的<a href="https://gitlab.com/gnutls/gnutls">readme</a>安装</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line">apt-get install -y dash git-core autoconf libtool gettext autopoint</span><br><span class="line">apt-get install -y automake python3 nettle-dev libp11-kit-dev libtspi-dev libunistring-dev</span><br><span class="line">apt-get install -y libtasn1-bin libtasn1-6-dev libidn2-0-dev gawk gperf</span><br><span class="line">apt-get install -y libtss2-dev libunbound-dev dns-root-data bison gtk-doc-tools</span><br><span class="line">apt-get install -y texinfo texlive texlive-plain-generic texlive-extra-utils</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译安装</span></span><br><span class="line">./bootstrap</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-
-<h2 id="error"><a href="#error" class="headerlink" title="error"></a>error</h2><ol>
-<li><p><code>Libnettle x.x was not found</code> (x是一个版本的数字，比如Libnettle 3.6 was not found)</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装nettle（源码安装或者sudo apt安装）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到pkgconfig文件夹，更新PKG_CONFIG_PATH路径，例如</span></span><br><span class="line">export PKG_CONFIG_PATH=&quot;/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span> </span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>nettlex.so not found</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到nettlex.so的地址，手动设置共享库地址</span> </span><br><span class="line">export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新缓存</span></span><br><span class="line">echo &quot;/usr/local/lib64&quot; | sudo tee /etc/ld.so.conf.d/local-lib.conf</span><br><span class="line">sudo ldconfig</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新编译</span></span><br><span class="line">sudo make clean</span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>./cha-config.texi:1: node System-wide configuration of the library&#39; lacks menu item for Enabling/Disabling RSAES-PKCS1-v1_5&#39; despite being its Up target</code> </p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo make clean</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">禁用文档生成</span></span><br><span class="line">./configure --with-included-libtasn1 --with-included-unistring --disable-doc</span><br><span class="line">sudo make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>E: 无法定位软件包 texlive-plain-generic</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装其他类似的安装包</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install texlive-base</span><br></pre></td></tr></table></figure></li>
-<li><p><code>libev4 was not found.</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sudo apt-get install libev4 libev-dev</span><br></pre></td></tr></table></figure></li>
-</ol>
+    <title>Welcome</title>
+    <url>/2024/05/23/Welcome/</url>
+    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
 ]]></content>
-      <categories>
-        <category>实验记录</category>
-      </categories>
-      <tags>
-        <tag>Gnutls</tag>
-        <tag>SSL</tag>
-      </tags>
   </entry>
   <entry>
     <title>StrongSwan部署小记</title>
@@ -158,12 +164,6 @@
         <tag>IPsec</tag>
         <tag>VPN</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>Welcome</title>
-    <url>/2024/05/23/Welcome/</url>
-    <content><![CDATA[<p>Welcome to hourhl’s blog! </p>
-]]></content>
   </entry>
   <entry>
     <title>《MySQL是怎样运行的》(一)</title>
@@ -650,6 +650,121 @@
       </tags>
   </entry>
   <entry>
+    <title>《MySQL是怎样运行的》（四）</title>
+    <url>/2024/09/06/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E5%9B%9B%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h1><h2 id="单表查询"><a href="#单表查询" class="headerlink" title="单表查询"></a>单表查询</h2><h3 id="访问方法"><a href="#访问方法" class="headerlink" title="访问方法"></a>访问方法</h3><ol>
+<li>MySQL执行查询语句的方式称为访问方法或者访问类型。同一个查询语句可以有多个访问方法来执行，不同访问方法进行查询的结果保持一致，但是所需的成本不同。</li>
+<li><strong>const</strong> 通过主键或者唯一二级索引列与常数的等值比较的访问方法。如果主键或者二级索引是由多个列来组成，则必须每一列都进行等值比较。<blockquote>
+<ul>
+<li>该访问方法被认为是常数级别的</li>
+<li>利用二级索引进行查询，并且查询条件为NULL时，不采用const访问方法。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>ref</strong> 通过二级索引列与常数进行等值比较，并且形成的扫描区间为单点扫描区间的访问方法。<blockquote>
+<ul>
+<li>采用二级索引来进行查询时，每找到一条符合条件的二级索引，都会立即回表查询，而不是得到所有的主键id再统一进行回表。</li>
+<li>当查询的值为NULL时，最多只能使用ref查询方法。</li>
+<li>对于索引列中包含多个列的索引来说，只要左边的列与常数进行等值比较，都可以用ref，如果是范围比较，就不能用ref。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>ref_or_null</strong> 比ref方法多了搜索条件为NULL。<blockquote>
+<ul>
+<li>值为NULL的记录会被放在索引树的最左边</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>range</strong> 使用索引查询时，对应的扫描区间为若干个单点扫描区间或者范围扫描区间的单表访问方法。</li>
+<li><strong>index</strong> 扫描全部二级索引记录的访问方法。<blockquote>
+<ul>
+<li>index访问方法的应用场景可以如下：查询结果是覆盖索引中对应的列，但是搜索条件不是按索引列的从左到右来的，可能是中间某个列或者某几个列。但是由于所要的结果在索引中已经存在，不需要再次回表查询了，仅需要扫描该索引即可。</li>
+</ul>
+</blockquote>
+</li>
+<li><strong>all</strong> 执行全表扫描的访问方法。</li>
+</ol>
+<h3 id="索引合并"><a href="#索引合并" class="headerlink" title="索引合并"></a>索引合并</h3><ol>
+<li><strong>索引合并</strong> 使用多个索引来完成一次查询的方法</li>
+<li><strong>Intersection索引合并</strong> 利用不同的索引分别进行扫描，得到的结果取交集，再利用得到的结果来进行回表。<blockquote>
+<p>要求使用二级索引的必须是等值查询，并且如果是联合索引，要求每一个索引列都要覆盖。原因：当二级索引的值相同时，叶子节点是根据主键排列的，便于取交集，并且在后续回表的过程中更有利于读取信息，而不是随机I&#x2F;O。<br>select * from table where key1 &#x3D; 10 and key2 &#x3D; 20;</p>
+</blockquote>
+</li>
+<li><strong>Union索引合并</strong> 利用不同的索引分别进行扫描，得到的结果取并集，再利用得到的结果来进行回表。<blockquote>
+<p>同样要求用二级索引的必须是等值查询，并且如果是联合索引，要求每一个索引列都要覆盖。原因：便于取并集，回表时的效率也高。<br>select * from table where key1 &#x3D; 10 or key2 &#x3D; 20;</p>
+</blockquote>
+</li>
+<li><strong>sort-union索引合并</strong> 利用不同索引分别进行扫描，得到结果先排序再取并集。<blockquote>
+<p>不要求二级索引必须等值查询，也不要求联合索引的每一个列都得是等值查询<br>select * from table where key1 &gt; 10 and index_part1 &#x3D; 1;</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="连接查询"><a href="#连接查询" class="headerlink" title="连接查询"></a>连接查询</h2><ul>
+<li>连接的本质就是把各个表中的记录都取出来进行一次匹配，并把匹配后的组合发送给客户端</li>
+<li><strong>驱动表</strong>即第一个需要查询的表，再根据驱动表到被<strong>驱动表</strong>中找匹配的记录。也就是说，驱动表只需要访问一次，被驱动表可能需要访问多次。每获得一条驱动表记录，都需要到被驱动表中寻找匹配的记录。</li>
+</ul>
+<h3 id="内连接"><a href="#内连接" class="headerlink" title="内连接"></a>内连接</h3><ul>
+<li>对于进行内连接查询的表，如果驱动表中的记录在被驱动表中没找到对应的，那就不会加入结果集中。</li>
+<li>内连接的查询基本步骤如下<ol>
+<li>选取驱动表，适用与驱动表相关的过滤条件，选取代价最低的单表访问方法来执行对驱动表的单表查询</li>
+<li>对步骤1中查询驱动表中得到的结果集中的每一条记录，都分别到被驱动表中查找匹配的记录。</li>
+</ol>
+</li>
+</ul>
+<h3 id="外连接"><a href="#外连接" class="headerlink" title="外连接"></a>外连接</h3><ul>
+<li>对于进行外连接查询的表(包括左外连接和右外连接)，即使驱动表中的记录在被驱动表中没找到对应的，还是会加入到结果集。</li>
+<li>左外连接 - 选择左侧的表为驱动表</li>
+<li>右外连接 - 选择右侧的表为驱动表<blockquote>
+<p>where子句中不符合条件的记录，不管是外连接还是内连接，都不会加入结果集。<br>on子句的处理方式就很符合内外连接的区别。如果不符合条件，在内连接中就不会加入结果集，但是在外连接中会加入结果集。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="计算成本"><a href="#计算成本" class="headerlink" title="计算成本"></a>计算成本</h2><ul>
+<li>一条查询语句的执行成本包括I&#x2F;O成本和CPU成本。前者指把记录从磁盘加载到内存中的时间，后者指读取记录、判断记录是否满足搜索条件、对结果进行排序等操作所损耗的时间。</li>
+<li>成本常数<ul>
+<li>读取一个页面的成本默认为1.0</li>
+<li>检测一个记录是否符合搜索条件的成本默认是0.2</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>示例：假设某查询语句需要用到索引uk_key2，且其对应的搜索条件是key2 &gt; 10 AND key2 &lt; 1000，即对应的扫描区间是(10, 1000);<br>根据 <strong>查询成本 &#x3D; I&#x2F;O成本 + CPU成本 &#x3D; （索引I&#x2F;O成本 + 记录I&#x2F;O成本）+（索引CPU成本 + 记录CPU成本）</strong>分别计算对应的值</p>
+<ol>
+<li><strong>索引I&#x2F;O成本</strong> 所谓I&#x2F;O成本即是将数据页从磁盘读取到内存的成本，MySQL认为有多少个区间就相当于有多少个页面，示例中只有一个页面，因此 <code>索引I/O成本 = 1 × 1.0</code></li>
+<li><strong>索引CPU成本</strong> 所谓CPU成本即是对记录读取、判断等操作的成本，因此需要先计算有多少条记录。计算过程为：先找到区间最左记录和区间最右记录（由于B+树中定位一条记录是常数级别的速度，因此该消耗忽略不计），然后判断两条记录的距离。如果两条记录相隔不太远，就直接读取中间数据页中的Page Header中的PAGE_N_RECS属性（代表当前页面有多少条记录），直接相加即可；如果两条记录相隔很远，则沿着区间最左记录所在页面向右读取10个页面，取每个页面记录的平均值，再乘以页面数就是总记录条数(记为N)。因此<code>索引CPU成本 = N × 0.2</code></li>
+<li><strong>记录I&#x2F;O成本</strong> 上一步已经算出总记录条数，此时需要进行回表来判断每条记录是否都符合除索引条件以外的其他条件，即需要将所在页面读取到内存中。因此<code>记录I/O成本 = N × 1</code></li>
+<li><strong>记录CPU成本</strong> 判断每条记录的具体情况。因此<code>记录CPU成本 = N × 0.2</code></li>
+</ol>
+</blockquote>
+<h3 id="单表查询成本"><a href="#单表查询成本" class="headerlink" title="单表查询成本"></a>单表查询成本</h3><ul>
+<li>执行一条查询语句的基本步骤<ol>
+<li>根据搜索条件，查找所有能用的索引</li>
+<li>计算全表扫描的成本</li>
+<li>计算使用各种索引的成本</li>
+<li>对比各种执行方案的代价，成本最低的方案就是所谓的执行计划</li>
+</ol>
+</li>
+</ul>
+<h3 id="连接查询成本"><a href="#连接查询成本" class="headerlink" title="连接查询成本"></a>连接查询成本</h3><ul>
+<li>当多张表连接查询时，驱动表访问一次，被驱动表访问多次，因此连接查询的成本是由单次查询驱动表的成本和多次查询被驱动表的成本组成。</li>
+<li>连接查询成本 &#x3D; 单次访问驱动表的成本 + 驱动表扇出值 × 单次访问被驱动表的成本<ul>
+<li>扇出 - 查询驱动表后得到的记录条数</li>
+<li>对于左外或者右外连接来说，驱动表是固定的。因此只需要分别为驱动表和被驱动表选择成本最低的访问方法</li>
+<li>对于内连接来说，驱动表和被驱动表可以互换，因此既需要考虑不同的表作为驱动表，又需要考虑当前驱动表下，驱动表和被驱动表的成本最低访问方法</li>
+</ul>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>数据库</tag>
+        <tag>查询</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>《MySQL是怎样运行的》（五）</title>
     <url>/2024/09/15/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%BA%94%EF%BC%89/</url>
     <content><![CDATA[<h1 id="InnoDB的表空间"><a href="#InnoDB的表空间" class="headerlink" title="InnoDB的表空间"></a>InnoDB的表空间</h1><h2 id="存储方式"><a href="#存储方式" class="headerlink" title="存储方式"></a>存储方式</h2><ul>
@@ -823,121 +938,6 @@
         <tag>MySQL</tag>
         <tag>数据库</tag>
         <tag>数据页</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>《MySQL是怎样运行的》（四）</title>
-    <url>/2024/09/06/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E5%9B%9B%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h1><h2 id="单表查询"><a href="#单表查询" class="headerlink" title="单表查询"></a>单表查询</h2><h3 id="访问方法"><a href="#访问方法" class="headerlink" title="访问方法"></a>访问方法</h3><ol>
-<li>MySQL执行查询语句的方式称为访问方法或者访问类型。同一个查询语句可以有多个访问方法来执行，不同访问方法进行查询的结果保持一致，但是所需的成本不同。</li>
-<li><strong>const</strong> 通过主键或者唯一二级索引列与常数的等值比较的访问方法。如果主键或者二级索引是由多个列来组成，则必须每一列都进行等值比较。<blockquote>
-<ul>
-<li>该访问方法被认为是常数级别的</li>
-<li>利用二级索引进行查询，并且查询条件为NULL时，不采用const访问方法。</li>
-</ul>
-</blockquote>
-</li>
-<li><strong>ref</strong> 通过二级索引列与常数进行等值比较，并且形成的扫描区间为单点扫描区间的访问方法。<blockquote>
-<ul>
-<li>采用二级索引来进行查询时，每找到一条符合条件的二级索引，都会立即回表查询，而不是得到所有的主键id再统一进行回表。</li>
-<li>当查询的值为NULL时，最多只能使用ref查询方法。</li>
-<li>对于索引列中包含多个列的索引来说，只要左边的列与常数进行等值比较，都可以用ref，如果是范围比较，就不能用ref。</li>
-</ul>
-</blockquote>
-</li>
-<li><strong>ref_or_null</strong> 比ref方法多了搜索条件为NULL。<blockquote>
-<ul>
-<li>值为NULL的记录会被放在索引树的最左边</li>
-</ul>
-</blockquote>
-</li>
-<li><strong>range</strong> 使用索引查询时，对应的扫描区间为若干个单点扫描区间或者范围扫描区间的单表访问方法。</li>
-<li><strong>index</strong> 扫描全部二级索引记录的访问方法。<blockquote>
-<ul>
-<li>index访问方法的应用场景可以如下：查询结果是覆盖索引中对应的列，但是搜索条件不是按索引列的从左到右来的，可能是中间某个列或者某几个列。但是由于所要的结果在索引中已经存在，不需要再次回表查询了，仅需要扫描该索引即可。</li>
-</ul>
-</blockquote>
-</li>
-<li><strong>all</strong> 执行全表扫描的访问方法。</li>
-</ol>
-<h3 id="索引合并"><a href="#索引合并" class="headerlink" title="索引合并"></a>索引合并</h3><ol>
-<li><strong>索引合并</strong> 使用多个索引来完成一次查询的方法</li>
-<li><strong>Intersection索引合并</strong> 利用不同的索引分别进行扫描，得到的结果取交集，再利用得到的结果来进行回表。<blockquote>
-<p>要求使用二级索引的必须是等值查询，并且如果是联合索引，要求每一个索引列都要覆盖。原因：当二级索引的值相同时，叶子节点是根据主键排列的，便于取交集，并且在后续回表的过程中更有利于读取信息，而不是随机I&#x2F;O。<br>select * from table where key1 &#x3D; 10 and key2 &#x3D; 20;</p>
-</blockquote>
-</li>
-<li><strong>Union索引合并</strong> 利用不同的索引分别进行扫描，得到的结果取并集，再利用得到的结果来进行回表。<blockquote>
-<p>同样要求用二级索引的必须是等值查询，并且如果是联合索引，要求每一个索引列都要覆盖。原因：便于取并集，回表时的效率也高。<br>select * from table where key1 &#x3D; 10 or key2 &#x3D; 20;</p>
-</blockquote>
-</li>
-<li><strong>sort-union索引合并</strong> 利用不同索引分别进行扫描，得到结果先排序再取并集。<blockquote>
-<p>不要求二级索引必须等值查询，也不要求联合索引的每一个列都得是等值查询<br>select * from table where key1 &gt; 10 and index_part1 &#x3D; 1;</p>
-</blockquote>
-</li>
-</ol>
-<h2 id="连接查询"><a href="#连接查询" class="headerlink" title="连接查询"></a>连接查询</h2><ul>
-<li>连接的本质就是把各个表中的记录都取出来进行一次匹配，并把匹配后的组合发送给客户端</li>
-<li><strong>驱动表</strong>即第一个需要查询的表，再根据驱动表到被<strong>驱动表</strong>中找匹配的记录。也就是说，驱动表只需要访问一次，被驱动表可能需要访问多次。每获得一条驱动表记录，都需要到被驱动表中寻找匹配的记录。</li>
-</ul>
-<h3 id="内连接"><a href="#内连接" class="headerlink" title="内连接"></a>内连接</h3><ul>
-<li>对于进行内连接查询的表，如果驱动表中的记录在被驱动表中没找到对应的，那就不会加入结果集中。</li>
-<li>内连接的查询基本步骤如下<ol>
-<li>选取驱动表，适用与驱动表相关的过滤条件，选取代价最低的单表访问方法来执行对驱动表的单表查询</li>
-<li>对步骤1中查询驱动表中得到的结果集中的每一条记录，都分别到被驱动表中查找匹配的记录。</li>
-</ol>
-</li>
-</ul>
-<h3 id="外连接"><a href="#外连接" class="headerlink" title="外连接"></a>外连接</h3><ul>
-<li>对于进行外连接查询的表(包括左外连接和右外连接)，即使驱动表中的记录在被驱动表中没找到对应的，还是会加入到结果集。</li>
-<li>左外连接 - 选择左侧的表为驱动表</li>
-<li>右外连接 - 选择右侧的表为驱动表<blockquote>
-<p>where子句中不符合条件的记录，不管是外连接还是内连接，都不会加入结果集。<br>on子句的处理方式就很符合内外连接的区别。如果不符合条件，在内连接中就不会加入结果集，但是在外连接中会加入结果集。</p>
-</blockquote>
-</li>
-</ul>
-<h2 id="计算成本"><a href="#计算成本" class="headerlink" title="计算成本"></a>计算成本</h2><ul>
-<li>一条查询语句的执行成本包括I&#x2F;O成本和CPU成本。前者指把记录从磁盘加载到内存中的时间，后者指读取记录、判断记录是否满足搜索条件、对结果进行排序等操作所损耗的时间。</li>
-<li>成本常数<ul>
-<li>读取一个页面的成本默认为1.0</li>
-<li>检测一个记录是否符合搜索条件的成本默认是0.2</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>示例：假设某查询语句需要用到索引uk_key2，且其对应的搜索条件是key2 &gt; 10 AND key2 &lt; 1000，即对应的扫描区间是(10, 1000);<br>根据 <strong>查询成本 &#x3D; I&#x2F;O成本 + CPU成本 &#x3D; （索引I&#x2F;O成本 + 记录I&#x2F;O成本）+（索引CPU成本 + 记录CPU成本）</strong>分别计算对应的值</p>
-<ol>
-<li><strong>索引I&#x2F;O成本</strong> 所谓I&#x2F;O成本即是将数据页从磁盘读取到内存的成本，MySQL认为有多少个区间就相当于有多少个页面，示例中只有一个页面，因此 <code>索引I/O成本 = 1 × 1.0</code></li>
-<li><strong>索引CPU成本</strong> 所谓CPU成本即是对记录读取、判断等操作的成本，因此需要先计算有多少条记录。计算过程为：先找到区间最左记录和区间最右记录（由于B+树中定位一条记录是常数级别的速度，因此该消耗忽略不计），然后判断两条记录的距离。如果两条记录相隔不太远，就直接读取中间数据页中的Page Header中的PAGE_N_RECS属性（代表当前页面有多少条记录），直接相加即可；如果两条记录相隔很远，则沿着区间最左记录所在页面向右读取10个页面，取每个页面记录的平均值，再乘以页面数就是总记录条数(记为N)。因此<code>索引CPU成本 = N × 0.2</code></li>
-<li><strong>记录I&#x2F;O成本</strong> 上一步已经算出总记录条数，此时需要进行回表来判断每条记录是否都符合除索引条件以外的其他条件，即需要将所在页面读取到内存中。因此<code>记录I/O成本 = N × 1</code></li>
-<li><strong>记录CPU成本</strong> 判断每条记录的具体情况。因此<code>记录CPU成本 = N × 0.2</code></li>
-</ol>
-</blockquote>
-<h3 id="单表查询成本"><a href="#单表查询成本" class="headerlink" title="单表查询成本"></a>单表查询成本</h3><ul>
-<li>执行一条查询语句的基本步骤<ol>
-<li>根据搜索条件，查找所有能用的索引</li>
-<li>计算全表扫描的成本</li>
-<li>计算使用各种索引的成本</li>
-<li>对比各种执行方案的代价，成本最低的方案就是所谓的执行计划</li>
-</ol>
-</li>
-</ul>
-<h3 id="连接查询成本"><a href="#连接查询成本" class="headerlink" title="连接查询成本"></a>连接查询成本</h3><ul>
-<li>当多张表连接查询时，驱动表访问一次，被驱动表访问多次，因此连接查询的成本是由单次查询驱动表的成本和多次查询被驱动表的成本组成。</li>
-<li>连接查询成本 &#x3D; 单次访问驱动表的成本 + 驱动表扇出值 × 单次访问被驱动表的成本<ul>
-<li>扇出 - 查询驱动表后得到的记录条数</li>
-<li>对于左外或者右外连接来说，驱动表是固定的。因此只需要分别为驱动表和被驱动表选择成本最低的访问方法</li>
-<li>对于内连接来说，驱动表和被驱动表可以互换，因此既需要考虑不同的表作为驱动表，又需要考虑当前驱动表下，驱动表和被驱动表的成本最低访问方法</li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
-        <tag>查询</tag>
       </tags>
   </entry>
   <entry>
