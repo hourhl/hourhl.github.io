@@ -20,21 +20,20 @@
     var CONFIG = {"hostname":"hourhl.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="基础知识客户端&#x2F;服务器架构 mysqld：MySQL服务器程序，运行该程序可以启动一个服务器进程 mysql：MySQL客户端程序，运行该程序可以发送请求并接收服务器的处理结果  客户端与服务器的连接">
+  <meta name="description" content="LAVA : Large-scale Automated Vulnerability Addition发表于IEEE Symposium on Security and Privacy 2016 基本信息 这篇论文的重点在于✅自动化、大规模、系统地✅ 在真实程序中植入可控漏洞✅ 生成一个有 Ground truth（已知漏洞位置+触发条件）的标准语料库（corpus）  如果有一个针对该程序的漏洞">
 <meta property="og:type" content="article">
-<meta property="og:title" content="《MySQL是怎样运行的》(一)">
-<meta property="og:url" content="https://hourhl.github.io/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/index.html">
+<meta property="og:title" content="论文阅读笔记-LAVA">
+<meta property="og:url" content="https://hourhl.github.io/2025/05/02/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-LAVA/index.html">
 <meta property="og:site_name" content="hourhl&#39;s blog">
-<meta property="og:description" content="基础知识客户端&#x2F;服务器架构 mysqld：MySQL服务器程序，运行该程序可以启动一个服务器进程 mysql：MySQL客户端程序，运行该程序可以发送请求并接收服务器的处理结果  客户端与服务器的连接">
+<meta property="og:description" content="LAVA : Large-scale Automated Vulnerability Addition发表于IEEE Symposium on Security and Privacy 2016 基本信息 这篇论文的重点在于✅自动化、大规模、系统地✅ 在真实程序中植入可控漏洞✅ 生成一个有 Ground truth（已知漏洞位置+触发条件）的标准语料库（corpus）  如果有一个针对该程序的漏洞">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-05-24T12:44:30.000Z">
-<meta property="article:modified_time" content="2024-10-21T10:54:08.123Z">
+<meta property="article:published_time" content="2025-05-02T13:14:14.000Z">
+<meta property="article:modified_time" content="2025-05-02T13:28:48.943Z">
 <meta property="article:author" content="lhl">
-<meta property="article:tag" content="MySQL">
-<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="自动化漏洞生成">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://hourhl.github.io/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/">
+<link rel="canonical" href="https://hourhl.github.io/2025/05/02/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-LAVA/">
 
 
 <script id="page-configurations">
@@ -47,7 +46,7 @@
   };
 </script>
 
-  <title>《MySQL是怎样运行的》(一) | hourhl's blog</title>
+  <title>论文阅读笔记-LAVA | hourhl's blog</title>
   
 
 
@@ -195,7 +194,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://hourhl.github.io/2024/05/24/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B-%E4%B8%80/">
+    <link itemprop="mainEntityOfPage" href="https://hourhl.github.io/2025/05/02/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-LAVA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -208,7 +207,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          《MySQL是怎样运行的》(一)
+          论文阅读笔记-LAVA
         </h1>
 
         <div class="post-meta">
@@ -217,24 +216,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2024-05-24 20:44:30" itemprop="dateCreated datePublished" datetime="2024-05-24T20:44:30+08:00">2024-05-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-10-21 18:54:08" itemprop="dateModified" datetime="2024-10-21T18:54:08+08:00">2024-10-21</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
-                </span>
+              <time title="创建时间：2025-05-02 21:14:14 / 修改时间：21:28:48" itemprop="dateCreated datePublished" datetime="2025-05-02T21:14:14+08:00">2025-05-02</time>
             </span>
 
           
@@ -250,14 +234,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2k</span>
+              <span>1.7k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -269,72 +253,91 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="客户端-服务器架构"><a href="#客户端-服务器架构" class="headerlink" title="客户端&#x2F;服务器架构"></a>客户端&#x2F;服务器架构</h2><ul>
-<li>mysqld：MySQL服务器程序，运行该程序可以启动一个服务器进程</li>
-<li>mysql：MySQL客户端程序，运行该程序可以发送请求并接收服务器的处理结果 </li>
-<li>客户端与服务器的连接<span id="more"></span>
+        <h1 id="LAVA-Large-scale-Automated-Vulnerability-Addition"><a href="#LAVA-Large-scale-Automated-Vulnerability-Addition" class="headerlink" title="LAVA : Large-scale Automated Vulnerability Addition"></a>LAVA : Large-scale Automated Vulnerability Addition</h1><p><strong>发表于IEEE Symposium on Security and Privacy 2016</strong></p>
+<h2 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h2><ul>
+<li><p>这篇论文的重点在于<br>✅<strong>自动化、大规模、系统地</strong><br>✅ <strong>在真实程序中植入可控漏洞</strong><br>✅ <strong>生成一个有 Ground truth（已知漏洞位置+触发条件）的标准语料库（corpus）</strong></p>
+</li>
+<li><p>如果有一个针对该程序的漏洞语料库，就能相对公平地评价哪些漏洞挖掘工具更强</p>
+</li>
+<li><p>因此<br><strong>LAVA 通过少量、自动的源代码修改，把真实严重的漏洞自然地注入到真实大程序中， 注入过程快、广泛分布、符合真实数据流、每个漏洞都带有精确触发输入。 这样，LAVA就能生成高质量、可实验、可复现的漏洞语料库</strong></p>
+</li>
+<li><p>LAVA注入漏洞的流程</p>
 <ul>
-<li>本质：进程间通信</li>
-<li>网络通信协议：TCP&#x2F;IP</li>
-<li>服务器默认端口：3306</li>
-<li>服务器处理的流程：连接管理 -&gt; 解析与优化 -&gt; 存储引擎<ul>
-<li><strong>连接管理</strong>：客户端可以携带主机信息、用户名与密码等信息，采用TCP&#x2F;TP、命名管道或者共享内存、UNIX套接字等方式连接服务端。每当有客户端信息验证通过，连接到服务器端进程时，服务器端就会创建一个线程进行交互；当通信结束后，并不会立即销毁该线程，而是缓存起来，当有新的客户端连接时，将这个线程分配给新的客户端</li>
-<li><strong>解析与优化</strong>：查询缓存 -&gt; 语法解析 -&gt; 查询优化<ol>
-<li>查询缓存 – 同样的请求会从缓存中查找结果，但是如果两个请求有任何字符上的不同，都会重新计算</li>
-<li>查询优化 – 优化的结果是生成一个执行计划，可以通过<code>explain</code>来查看</li>
-</ol>
-</li>
-<li><strong>存储引擎</strong>：默认引擎是InnoDB</li>
+<li>识别DUA数据（Dead, Uncomplicated and Available data）<ul>
+<li>TCN小 -&gt; 数据简单 -&gt; 可用。每次做合并计算时，新的 TCN &#x3D; 输入中最大的 TCN + 1</li>
+<li>liveness - 与污点标签和输入的字节相关联。liveness为0或者非常低的字节就非常适合用来做DUA。liveness 的值是该字节被用来决定多少个分支的计数，越小说明对程序的影响越小</li>
+<li>fig3和fig4中，越长且颜色越浅，越适合作为DUA。颜色浅说明TCN低或者liveness低，对程序的控制流影响少；长说明在程序中存活时间长</li>
 </ul>
 </li>
-<li>实现效果：客户端向服务器发送一段文本（SQL语句），服务器进程处理后再向客户端返回一段文本</li>
+<li>找到潜在攻击点（Attack point能够利用DUA数据的位置）<ul>
+<li>攻击必须发生在找到的DUA之后</li>
 </ul>
 </li>
-</ul>
-<h2 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h2><ul>
-<li>启动选项<ul>
-<li>命令行修改<br><code>仅对当次启动生效</code> </li>
-<li>配置文件修改<br><code>无论是Linux系统还是Windows系统，都有多个对应的配置文件查找路径，且路径之间有优先级</code></li>
-</ul>
-</li>
-<li>系统变量<ul>
-<li>系统变量有不同的作用范围，包括GLOBAL和SESSION</li>
-<li>大部分的系统变量可以当作启动项来设置，但是有些系统变量是程序运行过程中自动生成，无法修改</li>
+<li>注入代码（让DUA数据在攻击点处可用，并利用这些数据引发漏洞）<ul>
+<li>在DUA和攻击点之间引入数据流关系</li>
+<li>注意两点<ul>
+<li>为了保证DUA的有效访问，可能会将其抽取为静态变量或者全局变量</li>
+<li>为了保证漏洞不是随时可以触发的，会对代码添加一些确保条件</li>
 </ul>
 </li>
 </ul>
-<h2 id="字符集和比较规则"><a href="#字符集和比较规则" class="headerlink" title="字符集和比较规则"></a>字符集和比较规则</h2><ul>
-<li>将字符映射成二进制称为编码，反之为解码。人们抽象出一个字符集的概念来描述某个字符范围的编码规则<br><code>常见字符集：ASCII、ISO8859-1、GB2312等</code></li>
-<li>每个字符集有多个比较规则，比如是否区分重音、是否区分大小写等</li>
+</li>
 </ul>
-<h2 id="数据存放"><a href="#数据存放" class="headerlink" title="数据存放"></a>数据存放</h2><h3 id="数据目录"><a href="#数据目录" class="headerlink" title="数据目录"></a>数据目录</h3><ul>
-<li>MySQL会将数据存放到数据目录下，可以在客户端<code>show variables like &#39;datadir&#39;</code>来查看数据目录</li>
-<li>数据目录中存放着系统数据库、用户自定义的数据库以及一些系统相关文件<blockquote>
+</li>
+<li><p>其他设计方法</p>
 <ul>
-<li><code>mysql</code> 系统数据库，在数据目录下有对应的子文件夹。该数据库存储MySQL的用户账户和权限信息、一些存储过程和事件的定义信息、一些运行过程中产生的日志信息、一些帮助信息以及时区信息等。</li>
-<li><code>performance_schema</code> 系统数据库，在数据目录下有对应的子文件夹。该数据库主要保存MySQL服务器运行过程中的状态信息，包括统计最近执行了哪些语句、在执行过程的每个阶段花费了多长时间、内存的使用情况等。</li>
-<li><code>information_schema</code> 系统数据库，在数据目录下<strong>没有</strong>对应的文件夹。该数据库保存着MySQL服务器维护的所有其他数据库的信息，比如有哪些表、视图、触发器、列、索引等。并不是真实的数据，而是以描述性信息的形式存在，也称之为元数据。</li>
-<li><code>sys</code> 系统数据库，在数据目录下有对应的文件夹。主要通过视图的形式把information_schema和performance_schema结合起来，让开发人员更方便地了解MySQL服务器的性能。</li>
-<li><code>用户数据库</code> 用户自定义的数据库，在数据目录下有对应的子文件夹。详细信息见下文。</li>
-<li><code>服务器进程文件</code> 一个服务器程序对应着一个进程，该文件存储着相关的进程ID</li>
-<li><code>服务器日志文件</code> 包括查询日志、错误日志、二进制日志、redo日志等</li>
-<li><code>SSL和RSA证书与密钥文件</code></li>
+<li>直接修改源程序，降低代码安全性 - 漏洞不可控；破坏程序基本的正确性</li>
+<li>符号执行，判断哪些条件阻止了漏洞，直接修改条件绕过它 - 分析成本太大（符号执行、约束求解），因此只能制造浅层的漏洞</li>
 </ul>
-</blockquote>
 </li>
 </ul>
-<h3 id="用户数据库"><a href="#用户数据库" class="headerlink" title="用户数据库"></a>用户数据库</h3><ul>
-<li>当用户创建了一个数据库，系统就会在数据目录下创建一个同名的文件夹，并且在这个文件夹中生成一个名为dp.opt的文件，该文件存储了数据库的相关信息，包括字符集、比较规则等。<br><strong>在MySQL8.0中未见到</strong></li>
-<li>每个数据库对应的子文件夹下有两类文件，一类是描述表结构的文件，一类是数据文件<ol>
-<li><code>InnoDB</code> 在该引擎中，索引和用户记录都是当作数据来处理。数据存放在数据页中，采用表空间来管理数据页。表空间又包括多种类型，比如系统表空间和独立表空间<ol>
-<li><code>系统表空间</code> InnoDB会在文件目录下创建一个名为<strong>ibdata1</strong>，大小为12MB的文件（当容量不够时会自扩展）<br><strong>MySQL8.0版本在数据目录根目录下存在一个ibdata1</strong></li>
-<li><code>独立表空间</code> 在MySQL5.6.6及以后的版本中，默认把数据存放到独立表空间中。每当建立一个新的表，就会创建一个新的独立表空间，其文件名是<strong>表名.ibd</strong>，存放在该表所属的数据库的子文件夹下，同时还会创建一个<strong>表名.frm</strong>文件，来记录表格的相关信息。<br><strong>此处存疑：在MySQL8.0的数据库子目录下，我只看到了表名.idb,没有看到表名.frm</strong></li>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><ul>
+<li>编译一个被污点查询动态插桩的目标程序版本<ul>
+<li>基于PANDA（QEMU） - 能够对执行过程进行回放；可添加插件；集成S2E，能够将执行过程中的IR转为LLVM IR</li>
+</ul>
+</li>
+<li>运行程序，并使用不同的输入来测试<ul>
+<li>在QEMU中执行，以ISO的形式插入可执行程序，同时通过端口给QEMU发送执行指令</li>
+</ul>
+</li>
+<li>识别DUA和攻击点<ul>
+<li>DUA - TCN足够小；liveness足够小；</li>
+<li>目前攻击点（选择为指针或者整数）选择函数的参数，通过将dua注入来修改攻击点，造成漏洞。但是这种方法还是比较局限</li>
+</ul>
+</li>
+<li>插入漏洞重新编译，测试能否触发漏洞<ul>
+<li>使用Clang生成代码，该代码能进行漏洞触发。主要分为两步：1）保存DUA的值到静态变量等后续可以使用的位置；2）在attack point处判断DUA是否等于某个值，是则将其添加到函数的参数中，从而触发漏洞</li>
+</ul>
+</li>
+</ul>
+<h2 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h2><ul>
+<li>评估LAVA的有效性<ul>
+<li>在开源程序中注入大量漏洞，统计程序的相关数据和漏洞注入情况</li>
+<li>分析注入的漏洞的分布和真实性</li>
+<li>使用fuzzer和符号执行工具来测试对LAVA漏洞的</li>
+</ul>
+</li>
+<li>定义不同漏洞的标准：自动化漏洞检测工具对两个漏洞采用不同的推理分析方式</li>
+<li>漏洞现实性评估标准<ul>
+<li>DUA和attack point在程序执行中的分布情况</li>
+<li>程序的原始行为是否被保留</li>
+</ul>
+</li>
+<li>实验选择 - FUZZER和SES，都分别在目标程序上运行5小时<ul>
+<li>Coverage guided fuzzer (referred to as FUZZER)</li>
+<li>Symbolic execution + SAT solving (referred to as SES)</li>
+</ul>
+</li>
+</ul>
+<h2 id="局限性："><a href="#局限性：" class="headerlink" title="局限性："></a>局限性：</h2><ol>
+<li>仅关注往源码里插入漏洞，不关注二进制</li>
+<li>限制为linux平台上的C语言写的开源软件</li>
+<li>重点关注越界读写，后续会扩展</li>
+<li>不能插入逻辑bug</li>
+<li>LAVA的污点分析方法是基于数据流的，这意味着它特别擅长生成那些通过特定数据输入（例如攻击者控制的数据）来触发的漏洞。然而，<strong>逻辑错误</strong>、<strong>加密缺陷</strong> 和 <strong>侧信道漏洞</strong> 的触发方式通常不依赖于数据流控制，而是涉及程序内部复杂的逻辑判断、加密算法的设计缺陷或外部信息泄漏等机制。因此，<strong>这些漏洞的注入方式和LAVA目前的设计目标不匹配</strong></li>
+<li>LAVA引入了意外的漏洞（如使用后释放和解引用未初始化指针）</li>
+<li>没有关注误报率</li>
 </ol>
-</li>
-<li><code>MyISAM</code> 在该引擎中，索引和用户记录是分开存放的。其对应的子文件夹下有三类文件，分别是记录表结构的<strong>表名.ibd</strong>、记录用户记录的<strong>表名.MYD</strong>以及记录索引的<strong>表名.MY1</strong>.</li>
-</ol>
-</li>
-</ul>
 
     </div>
 
@@ -344,8 +347,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
-              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+              <a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96%E6%BC%8F%E6%B4%9E%E7%94%9F%E6%88%90/" rel="tag"># 自动化漏洞生成</a>
           </div>
 
         
@@ -354,13 +356,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/05/24/%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" rel="prev" title="搭建个人博客(Hexo + Github)">
-      <i class="fa fa-chevron-left"></i> 搭建个人博客(Hexo + Github)
+    <a href="/2025/03/31/C%E4%B8%8E%E6%B1%87%E7%BC%96%E7%9A%84%E5%87%BD%E6%95%B0%E4%BC%A0%E5%8F%82/" rel="prev" title="C与汇编的函数传参">
+      <i class="fa fa-chevron-left"></i> C与汇编的函数传参
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/05/27/%E6%92%B0%E5%86%99%E5%8D%9A%E5%AE%A2/" rel="next" title="撰写博客(Hexo + Github)">
-      撰写博客(Hexo + Github) <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -419,7 +418,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">客户端&#x2F;服务器架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.</span> <span class="nav-text">基本配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E9%9B%86%E5%92%8C%E6%AF%94%E8%BE%83%E8%A7%84%E5%88%99"><span class="nav-number">1.3.</span> <span class="nav-text">字符集和比较规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%98%E6%94%BE"><span class="nav-number">1.4.</span> <span class="nav-text">数据存放</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95"><span class="nav-number">1.4.1.</span> <span class="nav-text">数据目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">1.4.2.</span> <span class="nav-text">用户数据库</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#LAVA-Large-scale-Automated-Vulnerability-Addition"><span class="nav-number">1.</span> <span class="nav-text">LAVA : Large-scale Automated Vulnerability Addition</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.</span> <span class="nav-text">基本信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.2.</span> <span class="nav-text">具体实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.3.</span> <span class="nav-text">实验结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%80%E9%99%90%E6%80%A7%EF%BC%9A"><span class="nav-number">1.4.</span> <span class="nav-text">局限性：</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
