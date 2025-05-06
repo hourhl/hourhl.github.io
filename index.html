@@ -189,6 +189,86 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://hourhl.github.io/2025/05/06/%E6%9D%A8%E7%AB%8B%E6%98%86%E8%AE%BF%E8%B0%88%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="lhl">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hourhl's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/05/06/%E6%9D%A8%E7%AB%8B%E6%98%86%E8%AE%BF%E8%B0%88%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">杨立昆访谈总结</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-05-06 19:20:09 / 修改时间：19:33:13" itemprop="dateCreated datePublished" datetime="2025-05-06T19:20:09+08:00">2025-05-06</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>858</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>偶然阅读了一篇Yann LeCun教授的访谈，收获颇丰，故简单记录一下</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/05/06/%E6%9D%A8%E7%AB%8B%E6%98%86%E8%AE%BF%E8%B0%88%E6%80%BB%E7%BB%93/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://hourhl.github.io/2025/05/02/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-LAVA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -212,10 +292,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2025-05-02 21:14:14 / 修改时间：21:28:48" itemprop="dateCreated datePublished" datetime="2025-05-02T21:14:14+08:00">2025-05-02</time>
+              <time title="创建时间：2025-05-02 21:14:14" itemprop="dateCreated datePublished" datetime="2025-05-02T21:14:14+08:00">2025-05-02</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-05-06 19:21:29" itemprop="dateModified" datetime="2025-05-06T19:21:29+08:00">2025-05-06</time>
+              </span>
 
           <br>
             <span class="post-meta-item" title="本文字数">
@@ -242,92 +328,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="LAVA-Large-scale-Automated-Vulnerability-Addition"><a href="#LAVA-Large-scale-Automated-Vulnerability-Addition" class="headerlink" title="LAVA : Large-scale Automated Vulnerability Addition"></a>LAVA : Large-scale Automated Vulnerability Addition</h1><p><strong>发表于IEEE Symposium on Security and Privacy 2016</strong></p>
-<h2 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h2><ul>
-<li><p>这篇论文的重点在于<br>✅<strong>自动化、大规模、系统地</strong><br>✅ <strong>在真实程序中植入可控漏洞</strong><br>✅ <strong>生成一个有 Ground truth（已知漏洞位置+触发条件）的标准语料库（corpus）</strong></p>
-</li>
-<li><p>如果有一个针对该程序的漏洞语料库，就能相对公平地评价哪些漏洞挖掘工具更强</p>
-</li>
-<li><p>因此<br><strong>LAVA 通过少量、自动的源代码修改，把真实严重的漏洞自然地注入到真实大程序中， 注入过程快、广泛分布、符合真实数据流、每个漏洞都带有精确触发输入。 这样，LAVA就能生成高质量、可实验、可复现的漏洞语料库</strong></p>
-</li>
-<li><p>LAVA注入漏洞的流程</p>
-<ul>
-<li>识别DUA数据（Dead, Uncomplicated and Available data）<ul>
-<li>TCN小 -&gt; 数据简单 -&gt; 可用。每次做合并计算时，新的 TCN &#x3D; 输入中最大的 TCN + 1</li>
-<li>liveness - 与污点标签和输入的字节相关联。liveness为0或者非常低的字节就非常适合用来做DUA。liveness 的值是该字节被用来决定多少个分支的计数，越小说明对程序的影响越小</li>
-<li>fig3和fig4中，越长且颜色越浅，越适合作为DUA。颜色浅说明TCN低或者liveness低，对程序的控制流影响少；长说明在程序中存活时间长</li>
-</ul>
-</li>
-<li>找到潜在攻击点（Attack point能够利用DUA数据的位置）<ul>
-<li>攻击必须发生在找到的DUA之后</li>
-</ul>
-</li>
-<li>注入代码（让DUA数据在攻击点处可用，并利用这些数据引发漏洞）<ul>
-<li>在DUA和攻击点之间引入数据流关系</li>
-<li>注意两点<ul>
-<li>为了保证DUA的有效访问，可能会将其抽取为静态变量或者全局变量</li>
-<li>为了保证漏洞不是随时可以触发的，会对代码添加一些确保条件</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>其他设计方法</p>
-<ul>
-<li>直接修改源程序，降低代码安全性 - 漏洞不可控；破坏程序基本的正确性</li>
-<li>符号执行，判断哪些条件阻止了漏洞，直接修改条件绕过它 - 分析成本太大（符号执行、约束求解），因此只能制造浅层的漏洞</li>
-</ul>
-</li>
-</ul>
-<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><ul>
-<li>编译一个被污点查询动态插桩的目标程序版本<ul>
-<li>基于PANDA（QEMU） - 能够对执行过程进行回放；可添加插件；集成S2E，能够将执行过程中的IR转为LLVM IR</li>
-</ul>
-</li>
-<li>运行程序，并使用不同的输入来测试<ul>
-<li>在QEMU中执行，以ISO的形式插入可执行程序，同时通过端口给QEMU发送执行指令</li>
-</ul>
-</li>
-<li>识别DUA和攻击点<ul>
-<li>DUA - TCN足够小；liveness足够小；</li>
-<li>目前攻击点（选择为指针或者整数）选择函数的参数，通过将dua注入来修改攻击点，造成漏洞。但是这种方法还是比较局限</li>
-</ul>
-</li>
-<li>插入漏洞重新编译，测试能否触发漏洞<ul>
-<li>使用Clang生成代码，该代码能进行漏洞触发。主要分为两步：1）保存DUA的值到静态变量等后续可以使用的位置；2）在attack point处判断DUA是否等于某个值，是则将其添加到函数的参数中，从而触发漏洞</li>
-</ul>
-</li>
-</ul>
-<h2 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h2><ul>
-<li>评估LAVA的有效性<ul>
-<li>在开源程序中注入大量漏洞，统计程序的相关数据和漏洞注入情况</li>
-<li>分析注入的漏洞的分布和真实性</li>
-<li>使用fuzzer和符号执行工具来测试对LAVA漏洞的</li>
-</ul>
-</li>
-<li>定义不同漏洞的标准：自动化漏洞检测工具对两个漏洞采用不同的推理分析方式</li>
-<li>漏洞现实性评估标准<ul>
-<li>DUA和attack point在程序执行中的分布情况</li>
-<li>程序的原始行为是否被保留</li>
-</ul>
-</li>
-<li>实验选择 - FUZZER和SES，都分别在目标程序上运行5小时<ul>
-<li>Coverage guided fuzzer (referred to as FUZZER)</li>
-<li>Symbolic execution + SAT solving (referred to as SES)</li>
-</ul>
-</li>
-</ul>
-<h2 id="局限性："><a href="#局限性：" class="headerlink" title="局限性："></a>局限性：</h2><ol>
-<li>仅关注往源码里插入漏洞，不关注二进制</li>
-<li>限制为linux平台上的C语言写的开源软件</li>
-<li>重点关注越界读写，后续会扩展</li>
-<li>不能插入逻辑bug</li>
-<li>LAVA的污点分析方法是基于数据流的，这意味着它特别擅长生成那些通过特定数据输入（例如攻击者控制的数据）来触发的漏洞。然而，<strong>逻辑错误</strong>、<strong>加密缺陷</strong> 和 <strong>侧信道漏洞</strong> 的触发方式通常不依赖于数据流控制，而是涉及程序内部复杂的逻辑判断、加密算法的设计缺陷或外部信息泄漏等机制。因此，<strong>这些漏洞的注入方式和LAVA目前的设计目标不匹配</strong></li>
-<li>LAVA引入了意外的漏洞（如使用后释放和解引用未初始化指针）</li>
-<li>没有关注误报率</li>
-</ol>
-
+          <p>论文通过自动化地在程序中注入漏洞，来生成标准语料库，从而能够为漏洞检测程序提供评价标准</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/05/02/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-LAVA/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1072,101 +1081,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://hourhl.github.io/2024/08/14/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%B8%89%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="lhl">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="hourhl's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/08/14/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%B8%89%EF%BC%89/" class="post-title-link" itemprop="url">《MySQL是怎样运行的》（三）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-08-14 12:45:29" itemprop="dateCreated datePublished" datetime="2024-08-14T12:45:29+08:00">2024-08-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-10-21 18:54:12" itemprop="dateModified" datetime="2024-10-21T18:54:12+08:00">2024-10-21</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>当数据库的表格中存储的记录非常庞大时，全表搜索就会效率低下。MySQL利用索引提高了搜索的效率，达到了空间换时间的良好效果。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/08/14/%E3%80%8AMySQL%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B%EF%BC%88%E4%B8%89%EF%BC%89/">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1236,7 +1150,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-count">16</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1249,7 +1163,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1294,13 +1208,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">39k</span>
+    <span title="站点总字数">40k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:10</span>
+    <span title="站点阅读时长">1:12</span>
 </div>
 
         
